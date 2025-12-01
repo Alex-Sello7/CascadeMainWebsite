@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cascade Creations CRM</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SortableJS for drag-and-drop -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <!-- Alpine.js for reactivity -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+  
+  <style id="app-style">
+    :root {
+      --primary-blue: #2c5aa0;
+      --darker-blue: #1a365d;
+      --accent-blue: #4299e1;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9fafb;
+    }
+    
+    .sidebar {
+      background-color: var(--darker-blue);
+      min-height: 100vh;
+      transition: width 0.3s;
+    }
+    
+    .sidebar-collapsed {
+      width: 80px;
+    }
+    
+    .sidebar-expanded {
+      width: 250px;
+    }
+    
+    .nav-item {
+      color: white;
+      border-radius: 6px;
+      margin: 4px 0;
+      transition: background-color 0.2s;
+    }
+    
+    .nav-item:hover, .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .main-content {
+      transition: margin-left 0.3s;
+    }
+    
+    .kanban-column {
+      min-width: 300px;
+      background-color: #f1f5f9;
+      border-radius: 8px;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+    
+    .kanban-card {
+      background-color: white;
+      border-radius: 6px;
+      border-left: 4px solid var(--primary-blue);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      cursor: grab;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .kanban-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .kanban-column-header {
+      background-color: var(--primary-blue);
+      color: white;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #e5e7eb;
+      z-index: 0;
+    }
+    
+    .timeline-dot {
+      z-index: 1;
+      background-color: white;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      transition: background-color 0.2s;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--darker-blue);
+    }
+    
+    .btn-accent {
+      background-color: var(--accent-blue);
+      color: white;
+      transition: background-color 0.2s;
+    }
+    
+    .btn-accent:hover {
+      background-color: #3182ce;
+    }
+    
+    /* Modal styles */
+    .modal {
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Tab styles */
+    .tab-active {
+      border-bottom: 2px solid var(--primary-blue);
+      color: var(--primary-blue);
+    }
+
+    /* Form styling */
+    .form-input {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+      border-color: var(--primary-blue);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+    }
+
+    /* Spinner animation */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="overflow-hidden">
+  <div x-data="{ 
+    sidebarOpen: true, 
+    currentView: 'pipeline',
+    showProposalModal: false,
+    showLeadModal: false,
+    showInvoiceModal: false,
+    activeTab: 'active',
+    isLoading: false
+  }" class="flex h-screen">
+    
+    <!-- Sidebar -->
+    <div :class="sidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'" class="sidebar flex flex-col">
+      <!-- Logo -->
+      <div class="p-4 flex items-center justify-between">
+        <div class="flex items-center">
+          <img src="https://cdn.pixabay.com/photo/2016/12/13/22/39/cascade-1905627_1280.jpg" alt="Logo" class="h-10 w-10 rounded-lg">
+          <span x-show="sidebarOpen" class="text-white font-bold ml-3 text-xl">Cascade CRM</span>
+        </div>
+        <button @click="sidebarOpen = !sidebarOpen" class="text-white">
+          <i :class="sidebarOpen ? 'fa-solid fa-chevron-left' : 'fa-solid fa-chevron-right'"></i>
+        </button>
+      </div>
+      
+      <!-- Nav items -->
+      <nav class="mt-8 px-2 flex-1">
+        <div @click="currentView = 'pipeline'" class="nav-item p-3 flex items-center mb-2" :class="{'active': currentView === 'pipeline'}">
+          <i class="fa-solid fa-filter text-lg"></i>
+          <span x-show="sidebarOpen" class="ml-3">Sales Pipeline</span>
+        </div>
+        
+        <div @click="currentView = 'time'" class="nav-item p-3 flex items-center mb-2" :class="{'active': currentView === 'time'}">
+          <i class="fa-solid fa-clock text-lg"></i>
+          <span x-show="sidebarOpen" class="ml-3">Time & Invoicing</span>
+        </div>
+        
+        <div @click="currentView = 'communication'" class="nav-item p-3 flex items-center mb-2" :class="{'active': currentView === 'communication'}">
+          <i class="fa-solid fa-comment-dots text-lg"></i>
+          <span x-show="sidebarOpen" class="ml-3">Communication Hub</span>
+        </div>
+        
+        <div x-show="sidebarOpen" class="border-t border-gray-700 my-4"></div>
+        
+        <div @click="currentView = 'projects'" class="nav-item p-3 flex items-center mb-2" :class="{'active': currentView === 'projects'}">
+          <i class="fa-solid fa-briefcase text-lg"></i>
+          <span x-show="sidebarOpen" class="ml-3">Projects</span>
+        </div>
+        
+        <div @click="currentView = 'reports'" class="nav-item p-3 flex items-center mb-2" :class="{'active': currentView === 'reports'}">
+          <i class="fa-solid fa-chart-pie text-lg"></i>
+          <span x-show="sidebarOpen" class="ml-3">Reports & Analytics</span>
+        </div>
+        
+        <div @click="currentView = 'settings'" class="nav-item p-3 flex items-center mb-2" :class="{'active': currentView === 'settings'}">
+          <i class="fa-solid fa-gear text-lg"></i>
+          <span x-show="sidebarOpen" class="ml-3">Settings</span>
+        </div>
+      </nav>
+      
+      <!-- User menu -->
+      <div class="p-4 border-t border-gray-700">
+        <div class="flex items-center">
+          <div class="h-9 w-9 rounded-full bg-accent-blue flex items-center justify-center text-white font-semibold">JD</div>
+          <div x-show="sidebarOpen" class="ml-3">
+            <p class="text-white text-sm font-semibold">John Doe</p>
+            <p class="text-gray-300 text-xs">Admin</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main content -->
+    <div :class="sidebarOpen ? 'ml-[250px]' : 'ml-[80px]'" class="flex-1 main-content overflow-hidden">
+      <!-- Header -->
+      <header class="bg-white shadow-sm py-4 px-6 flex items-center justify-between">
+        <div>
+          <h1 x-text="currentView === 'pipeline' ? 'Sales Pipeline' : currentView === 'time' ? 'Time & Invoicing' : currentView === 'communication' ? 'Communication Hub' : currentView === 'projects' ? 'Projects' : currentView === 'reports' ? 'Reports & Analytics' : 'Settings'" class="text-2xl font-bold text-gray-800"></h1>
+          <p class="text-sm text-gray-500">
+            <span x-text="new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })"></span>
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <input type="text" placeholder="Search..." class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-blue focus:border-transparent">
+            <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-gray-400"></i>
+          </div>
+          
+          <div class="relative">
+            <button class="relative p-2">
+              <i class="fa-regular fa-bell text-gray-600 text-xl"></i>
+              <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Content sections -->
+      <main class="p-6 overflow-y-auto" style="height: calc(100vh - 76px);">
+        
+        <!-- Sales Pipeline View -->
+        <div x-show="currentView === 'pipeline'" class="h-full">
+          <div class="mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <button class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2" @click="showLeadModal = true">
+                <i class="fa-solid fa-plus"></i> New Lead
+              </button>
+              <div class="relative">
+                <select class="px-4 py-2 rounded-lg border border-gray-300 bg-white appearance-none pr-8">
+                  <option>All Leads</option>
+                  <option>My Leads</option>
+                  <option>Unassigned Leads</option>
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-gray-500 pointer-events-none"></i>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-gray-600">Total Pipeline Value:</span>
+              <span class="font-bold text-xl">$248,500</span>
+            </div>
+          </div>
+          
+          <!-- Kanban Board -->
+          <div class="flex gap-6 overflow-x-auto pb-4 h-full">
+            <!-- New Inquiry -->
+            <div class="kanban-column flex flex-col">
+              <div class="kanban-column-header p-3">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-semibold">New Inquiry</h3>
+                  <span class="bg-white bg-opacity-20 px-2 py-1 rounded text-sm">$62,500</span>
+                </div>
+              </div>
+              
+              <div class="kanban-cards p-3 flex-1" id="new-inquiry">
+                <!-- Card 1 -->
+                <div class="kanban-card p-4 mb-3">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Acme Corp</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$25,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">E-commerce site redesign with custom product catalog.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Added 2 days ago</span>
+                    <button class="text-primary-blue hover:text-accent-blue" @click="showProposalModal = true">
+                      <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="kanban-card p-4 mb-3">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">TechStart Inc.</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$15,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Single-page marketing website with animations.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Added 3 days ago</span>
+                    <button class="text-primary-blue hover:text-accent-blue" @click="showProposalModal = true">
+                      <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="kanban-card p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">GreenLeaf Gardens</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$22,500</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Booking system for landscaping services.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Added 4 days ago</span>
+                    <button class="text-primary-blue hover:text-accent-blue" @click="showProposalModal = true">
+                      <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contacted -->
+            <div class="kanban-column flex flex-col">
+              <div class="kanban-column-header p-3">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-semibold">Contacted</h3>
+                  <span class="bg-white bg-opacity-20 px-2 py-1 rounded text-sm">$48,000</span>
+                </div>
+              </div>
+              
+              <div class="kanban-cards p-3 flex-1" id="contacted">
+                <!-- Card 1 -->
+                <div class="kanban-card p-4 mb-3">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Bright Futures Academy</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$30,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">School management dashboard & student portal.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Meeting scheduled</span>
+                    <button class="text-primary-blue hover:text-accent-blue" @click="showProposalModal = true">
+                      <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="kanban-card p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Stellar Properties</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$18,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Real estate listing portal with virtual tours.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Follow-up needed</span>
+                    <button class="text-primary-blue hover:text-accent-blue" @click="showProposalModal = true">
+                      <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Proposal Sent -->
+            <div class="kanban-column flex flex-col">
+              <div class="kanban-column-header p-3">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-semibold">Proposal Sent</h3>
+                  <span class="bg-white bg-opacity-20 px-2 py-1 rounded text-sm">$65,000</span>
+                </div>
+              </div>
+              
+              <div class="kanban-cards p-3 flex-1" id="proposal-sent">
+                <!-- Card 1 -->
+                <div class="kanban-card p-4 mb-3">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Vitality Fitness</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$35,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Membership management & class booking system.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Sent 5 days ago</span>
+                    <div class="flex gap-2">
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-edit"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="kanban-card p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Global Eats Delivery</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$30,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Restaurant dashboard & order management.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Sent 2 days ago</span>
+                    <div class="flex gap-2">
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-edit"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Negotiation -->
+            <div class="kanban-column flex flex-col">
+              <div class="kanban-column-header p-3">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-semibold">Negotiation</h3>
+                  <span class="bg-white bg-opacity-20 px-2 py-1 rounded text-sm">$73,000</span>
+                </div>
+              </div>
+              
+              <div class="kanban-cards p-3 flex-1" id="negotiation">
+                <!-- Card 1 -->
+                <div class="kanban-card p-4 mb-3">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Horizon Events</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$45,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Event management platform with ticket sales.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Client reviewing final terms</span>
+                    <div class="flex gap-2">
+                      <button class="text-primary-blue hover:text-accent-blue">
+                        <i class="fa-solid fa-handshake"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="kanban-card p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Nova Health Clinic</h4>
+                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">$28,000</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Patient portal & appointment scheduling.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Discussing payment terms</span>
+                    <div class="flex gap-2">
+                      <button class="text-primary-blue hover:text-accent-blue">
+                        <i class="fa-solid fa-handshake"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Won / Lost -->
+            <div class="kanban-column flex flex-col">
+              <div class="kanban-column-header p-3">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-semibold">Won / Lost</h3>
+                  <span class="bg-white bg-opacity-20 px-2 py-1 rounded text-sm">$0</span>
+                </div>
+              </div>
+              
+              <div class="kanban-cards p-3 flex-1" id="won-lost">
+                <!-- Card 1 -->
+                <div class="kanban-card p-4 mb-3 border-l-green-500">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Quantum Analytics</h4>
+                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">$42,000 - Won</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">Business intelligence dashboard.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Start date: Jul 15, 2025</span>
+                    <button class="text-primary-blue hover:text-accent-blue">
+                      <i class="fa-solid fa-folder-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="kanban-card p-4 border-l-red-500">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-semibold">Meridian Coffee Co.</h4>
+                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">$18,000 - Lost</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">E-commerce store with subscription options.</p>
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500">Budget constraints</span>
+                    <button class="text-gray-400 hover:text-gray-600">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Time & Invoicing View -->
+        <div x-show="currentView === 'time'" class="h-full">
+          <div class="mb-6 flex items-center justify-between">
+            <div class="flex">
+              <button @click="activeTab = 'active'" class="px-4 py-2 font-medium" :class="activeTab === 'active' ? 'tab-active' : 'text-gray-500'">Active Tasks</button>
+              <button @click="activeTab = 'invoices'" class="px-4 py-2 font-medium" :class="activeTab === 'invoices' ? 'tab-active' : 'text-gray-500'">Invoices</button>
+            </div>
+            
+            <div>
+              <button class="btn-primary px-4 py-2 rounded-lg" @click="showInvoiceModal = true">
+                <i class="fa-solid fa-plus mr-2"></i>Create Invoice
+              </button>
+            </div>
+          </div>
+          
+          <div x-show="activeTab === 'active'" class="bg-white rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 class="font-semibold text-lg">Active Tasks</h2>
+              <div class="flex gap-4">
+                <div class="flex items-center">
+                  <span class="text-sm text-gray-500 mr-2">Week of:</span>
+                  <div class="relative">
+                    <input type="date" class="form-input" value="2025-06-23">
+                  </div>
+                </div>
+                <button class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                  Export <i class="fa-solid fa-download ml-1"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 text-left">
+                  <tr>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Timer</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Hours Logged</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <!-- Row 1 -->
+                  <tr>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-md bg-blue-100 text-primary-blue flex items-center justify-center mr-3">
+                          <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <span class="font-medium">Quantum Analytics</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">UI Design for Dashboard</td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-7 w-7 rounded-full bg-purple-500 text-white flex items-center justify-center mr-2">
+                          <span class="text-xs">SM</span>
+                        </div>
+                        <span>Sarah Miller</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="text-red-600 font-medium">Jun 25, 2025</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <button class="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600">
+                          <i class="fa-solid fa-play"></i>
+                        </button>
+                        <span>00:00:00</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="font-medium">4.5</span>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 2 -->
+                  <tr>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-md bg-blue-100 text-primary-blue flex items-center justify-center mr-3">
+                          <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <span class="font-medium">Quantum Analytics</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">Backend API Development</td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-7 w-7 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2">
+                          <span class="text-xs">JC</span>
+                        </div>
+                        <span>James Chen</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span>Jul 02, 2025</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <button class="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600">
+                          <i class="fa-solid fa-play"></i>
+                        </button>
+                        <span>00:00:00</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="font-medium">8.0</span>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 3 -->
+                  <tr>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
+                          <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <span class="font-medium">Vitality Fitness</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">Wireframe Review</td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-7 w-7 rounded-full bg-teal-500 text-white flex items-center justify-center mr-2">
+                          <span class="text-xs">AR</span>
+                        </div>
+                        <span>Alex Rodriguez</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span>Jun 28, 2025</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <button class="h-8 w-8 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600">
+                          <i class="fa-solid fa-stop"></i>
+                        </button>
+                        <span>01:24:15</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="font-medium">2.5</span>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 4 -->
+                  <tr>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-8 w-8 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
+                          <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <span class="font-medium">Vitality Fitness</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">User Authentication System</td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="h-7 w-7 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2">
+                          <span class="text-xs">JC</span>
+                        </div>
+                        <span>James Chen</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span>Jul 05, 2025</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-2">
+                        <button class="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600">
+                          <i class="fa-solid fa-play"></i>
+                        </button>
+                        <span>00:00:00</span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="font-medium">6.0</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div x-show="activeTab === 'invoices'" class="bg-white rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 class="font-semibold text-lg">Invoices</h2>
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <select class="form-input pl-3 pr-10 py-2 appearance-none">
+                    <option>All Time</option>
+                    <option>This Month</option>
+                    <option>Last Month</option>
+                    <option>Last Quarter</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down absolute right-3 top-3 text-gray-400 pointer-events-none"></i>
+                </div>
+                <button class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                  Export <i class="fa-solid fa-download ml-1"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 text-left">
+                  <tr>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <!-- Row 1 -->
+                  <tr>
+                    <td class="px-6 py-4 font-medium">INV-2025-0042</td>
+                    <td class="px-6 py-4">Quantum Analytics</td>
+                    <td class="px-6 py-4">Jun 15, 2025</td>
+                    <td class="px-6 py-4 font-medium">$12,600.00</td>
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Paid
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex gap-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-download"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 2 -->
+                  <tr>
+                    <td class="px-6 py-4 font-medium">INV-2025-0041</td>
+                    <td class="px-6 py-4">Vitality Fitness</td>
+                    <td class="px-6 py-4">Jun 10, 2025</td>
+                    <td class="px-6 py-4 font-medium">$17,500.00</td>
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        Sent
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex gap-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-download"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-bell"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 3 -->
+                  <tr>
+                    <td class="px-6 py-4 font-medium">INV-2025-0040</td>
+                    <td class="px-6 py-4">Nova Health Clinic</td>
+                    <td class="px-6 py-4">Jun 02, 2025</td>
+                    <td class="px-6 py-4 font-medium">$8,400.00</td>
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        Viewed
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex gap-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-download"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-bell"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 4 -->
+                  <tr>
+                    <td class="px-6 py-4 font-medium">INV-2025-0039</td>
+                    <td class="px-6 py-4">Stellar Properties</td>
+                    <td class="px-6 py-4">May 28, 2025</td>
+                    <td class="px-6 py-4 font-medium">$5,400.00</td>
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Overdue
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex gap-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-download"></i>
+                        </button>
+                        <button class="text-red-500 hover:text-red-700">
+                          <i class="fa-solid fa-bell"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Row 5 -->
+                  <tr>
+                    <td class="px-6 py-4 font-medium">INV-2025-0038</td>
+                    <td class="px-6 py-4">Horizon Events</td>
+                    <td class="px-6 py-4">May 20, 2025</td>
+                    <td class="px-6 py-4 font-medium">$22,500.00</td>
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Draft
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex gap-2">
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-edit"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                          <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Communication Hub View -->
+        <div x-show="currentView === 'communication'" class="h-full">
+          <div class="flex h-full">
+            <!-- Sidebar -->
+            <div class="w-1/4 bg-white rounded-lg shadow-sm mr-6 flex flex-col">
+              <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="font-semibold text-lg">Inbox</h2>
+              </div>
+              <div class="px-4 py-3 border-b border-gray-200">
+                <div class="relative">
+                  <input type="text" placeholder="Search messages..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300">
+                  <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+              </div>
+              <div class="flex-1 overflow-y-auto">
+                <!-- Message thread 1 (unread) -->
+                <div class="px-4 py-3 border-b border-gray-100 bg-blue-50 cursor-pointer">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                      <div class="h-9 w-9 rounded-full bg-green-500 text-white flex items-center justify-center mr-2">
+                        <span class="text-sm">AC</span>
+                      </div>
+                      <span class="font-semibold">Acme Corp</span>
+                    </div>
+                    <span class="text-xs text-gray-500">10:23 AM</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">Thank you for sending over the proposal. We had a few questions about the timeline...</p>
+                  <div class="mt-1 flex items-center">
+                    <span class="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
+                    <span class="text-xs text-blue-600 font-medium">New message</span>
+                  </div>
+                </div>
+                
+                <!-- Message thread 2 -->
+                <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                      <div class="h-9 w-9 rounded-full bg-purple-500 text-white flex items-center justify-center mr-2">
+                        <span class="text-sm">BF</span>
+                      </div>
+                      <span class="font-semibold">Bright Futures Academy</span>
+                    </div>
+                    <span class="text-xs text-gray-500">Yesterday</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">Hi, I wanted to follow up on our meeting last week. Have you had a chance to review...</p>
+                </div>
+                
+                <!-- Message thread 3 -->
+                <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                      <div class="h-9 w-9 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2">
+                        <span class="text-sm">TS</span>
+                      </div>
+                      <span class="font-semibold">TechStart Inc.</span>
+                    </div>
+                    <span class="text-xs text-gray-500">Jun 20</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">We're excited to get started on our project. When can we expect the first mockups?</p>
+                </div>
+                
+                <!-- Message thread 4 -->
+                <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                      <div class="h-9 w-9 rounded-full bg-red-500 text-white flex items-center justify-center mr-2">
+                        <span class="text-sm">VF</span>
+                      </div>
+                      <span class="font-semibold">Vitality Fitness</span>
+                    </div>
+                    <span class="text-xs text-gray-500">Jun 18</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">Looking forward to our kickoff meeting next Monday. I've invited our marketing team...</p>
+                </div>
+                
+                <!-- Message thread 5 -->
+                <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center">
+                      <div class="h-9 w-9 rounded-full bg-yellow-500 text-white flex items-center justify-center mr-2">
+                        <span class="text-sm">GL</span>
+                      </div>
+                      <span class="font-semibold">GreenLeaf Gardens</span>
+                    </div>
+                    <span class="text-xs text-gray-500">Jun 15</span>
+                  </div>
+                  <p class="text-sm text-gray-600 truncate">Can we schedule a call to discuss your proposal in more detail? I'm available...</p>
+                </div>
+              </div>
+              <div class="px-4 py-3 border-t border-gray-200">
+                <button class="btn-primary w-full py-2 rounded-lg flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-pen"></i> Compose New
+                </button>
+              </div>
+            </div>
+            
+            <!-- Message Content -->
+            <div class="w-3/4 bg-white rounded-lg shadow-sm flex flex-col">
+              <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 rounded-full bg-green-500 text-white flex items-center justify-center mr-3">
+                    <span>AC</span>
+                  </div>
+                  <div>
+                    <h2 class="font-semibold text-lg">Acme Corp</h2>
+                    <p class="text-sm text-gray-500">Jessica Thompson, Marketing Director</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-phone"></i>
+                  </button>
+                  <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-video"></i>
+                  </button>
+                  <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-user-plus"></i>
+                  </button>
+                  <div class="h-5 border-r border-gray-300"></div>
+                  <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="flex-1 overflow-y-auto p-6">
+                <!-- Messages timeline -->
+                <div class="timeline relative pl-8">
+                  <!-- Message 1 -->
+                  <div class="timeline-item relative pb-8">
+                    <div class="timeline-dot absolute left-0 w-8 h-8 rounded-full border-2 border-primary-blue flex items-center justify-center">
+                      <i class="fa-solid fa-paper-plane text-primary-blue"></i>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 ml-4">
+                      <div class="flex justify-between items-start mb-2">
+                        <span class="font-medium">You sent a proposal</span>
+                        <span class="text-sm text-gray-500">Jun 21, 10:15 AM</span>
+                      </div>
+                      <p class="text-gray-600 mb-3">Hi Jessica, Thank you for your interest in our services. Attached is the proposal for your e-commerce redesign project as discussed.</p>
+                      <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center">
+                        <i class="fa-solid fa-file-pdf text-red-500 text-2xl mr-3"></i>
+                        <div>
+                          <p class="font-medium">Acme_Corp_Ecommerce_Proposal.pdf</p>
+                          <p class="text-sm text-gray-500">2.4 MB • Sent via Cascade CRM</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Message 2 -->
+                  <div class="timeline-item relative pb-8">
+                    <div class="timeline-dot absolute left-0 w-8 h-8 rounded-full border-2 border-accent-blue flex items-center justify-center">
+                      <i class="fa-solid fa-envelope text-accent-blue"></i>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 ml-4">
+                      <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center">
+                          <div class="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-2">
+                            <span class="text-xs">AC</span>
+                          </div>
+                          <span class="font-medium">Jessica Thompson</span>
+                        </div>
+                        <span class="text-sm text-gray-500">Jun 22, 4:30 PM</span>
+                      </div>
+                      <p class="text-gray-600 mb-3">Hello, Thank you for the detailed proposal. Our team has reviewed it and we're quite impressed with your approach. We do have a few questions regarding the timeline and implementation process:</p>
+                      <ol class="list-decimal ml-5 mb-3 text-gray-600">
+                        <li class="mb-1">Is it possible to expedite the first phase delivery?</li>
+                        <li class="mb-1">Can we integrate our existing inventory system?</li>
+                        <li>What's your approach to mobile optimization?</li>
+                      </ol>
+                      <p class="text-gray-600">Looking forward to your response.</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Message 3 -->
+                  <div class="timeline-item relative">
+                    <div class="timeline-dot absolute left-0 w-8 h-8 rounded-full border-2 border-accent-blue flex items-center justify-center">
+                      <i class="fa-solid fa-envelope text-accent-blue"></i>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 ml-4">
+                      <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center">
+                          <div class="h-8 w-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-2">
+                            <span class="text-xs">AC</span>
+                          </div>
+                          <span class="font-medium">Jessica Thompson</span>
+                        </div>
+                        <span class="text-sm text-gray-500">Today, 10:23 AM</span>
+                      </div>
+                      <p class="text-gray-600 mb-3">Hi there, Just following up on my previous email. We're meeting with our board next week and I'd like to include your responses in my presentation. Could you please get back to me when you have a chance?</p>
+                      <p class="text-gray-600">Thanks so much,<br>Jessica</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Reply area -->
+              <div class="p-4 border-t border-gray-200">
+                <div class="bg-gray-50 rounded-lg p-3">
+                  <div class="mb-3">
+                    <textarea placeholder="Type your reply..." class="w-full border-0 bg-transparent resize-none focus:outline-none" rows="4"></textarea>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-paperclip"></i>
+                      </button>
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-regular fa-face-smile"></i>
+                      </button>
+                      <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-at"></i>
+                      </button>
+                    </div>
+                    <button class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
+                      Send <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Other views (Projects, Reports, Settings) would go here -->
+        <!-- For brevity, we're showing just the main views as per the spec -->
+      </main>
+    </div>
+  </div>
+  
+  <!-- Proposal Modal -->
+  <div x-show="showProposalModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" @click="showProposalModal = false">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+        <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Generate Proposal</h3>
+            <button @click="showProposalModal = false" class="text-gray-500 hover:text-gray-700">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-3 gap-6">
+            <div class="col-span-1 border-r border-gray-200 pr-6">
+              <h4 class="font-medium mb-4 text-gray-700">Client Information</h4>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" value="Acme Corp" class="form-input w-full">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                <input type="text" value="Jessica Thompson" class="form-input w-full">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <input type="email" value="j.thompson@acmecorp.com" class="form-input w-full">
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Project Type</label>
+                <select class="form-input w-full">
+                  <option>E-commerce Website</option>
+                  <option>Single-Page Website</option>
+                  <option>Business Dashboard</option>
+                  <option>Event Website</option>
+                  <option>Full-Stack Development</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Budget Range</label>
+                <input type="text" value="$20,000 - $30,000" class="form-input w-full">
+              </div>
+            </div>
+            
+            <div class="col-span-2 pl-6">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="font-medium text-gray-700">Proposal Content</h4>
+                <div class="flex gap-2">
+                  <button class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+                    Save as Template
+                  </button>
+                  <div class="relative">
+                    <select class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm appearance-none pr-8">
+                      <option>Load Template</option>
+                      <option>Standard E-commerce</option>
+                      <option>Premium Website</option>
+                      <option>MVP Startup</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-2 top-2 text-gray-500 pointer-events-none text-xs"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="border border-gray-200 rounded-lg mb-4">
+                <div class="border-b border-gray-200 p-2 flex gap-2 bg-gray-50">
+                  <button class="px-2 py-1 text-gray-500 hover:bg-white hover:text-gray-700 rounded">
+                    <i class="fa-solid fa-bold"></i>
+                  </button>
+                  <button class="px-2 py-1 text-gray-500 hover:bg-white hover:text-gray-700 rounded">
+                    <i class="fa-solid fa-italic"></i>
+                  </button>
+                  <button class="px-2 py-1 text-gray-500 hover:bg-white hover:text-gray-700 rounded">
+                    <i class="fa-solid fa-list-ul"></i>
+                  </button>
+                  <button class="px-2 py-1 text-gray-500 hover:bg-white hover:text-gray-700 rounded">
+                    <i class="fa-solid fa-list-ol"></i>
+                  </button>
+                  <div class="h-6 border-r border-gray-300 mx-1"></div>
+                  <button class="px-2 py-1 text-gray-500 hover:bg-white hover:text-gray-700 rounded">
+                    <i class="fa-solid fa-paperclip"></i>
+                  </button>
+                  <button class="px-2 py-1 text-gray-500 hover:bg-white hover:text-gray-700 rounded">
+                    <i class="fa-solid fa-image"></i>
+                  </button>
+                </div>
+                
+                <div class="p-4">
+                  <div class="mb-6 border-b border-gray-200 pb-4">
+                    <input type="text" value="E-commerce Website Redesign Proposal" class="w-full font-bold text-xl border-0 focus:outline-none focus:ring-0">
+                  </div>
+                  
+                  <div class="mb-4">
+                    <p class="mb-4">Dear {{client_name}},</p>
+                    <p class="mb-4">Thank you for considering Cascade Creations for your e-commerce website redesign project. We're excited about the opportunity to work with {{company_name}} to transform your online presence and drive business growth.</p>
+                    <p class="mb-4">Based on our discussions, we propose the following solutions to meet your objectives:</p>
+                  </div>
+                  
+                  <div class="mb-4">
+                    <h4 class="font-bold mb-2">Project Scope</h4>
+                    <ul class="list-disc pl-5 mb-4">
+                      <li class="mb-1">Complete redesign of your e-commerce storefront</li>
+                      <li class="mb-1">Custom product catalog with advanced filtering</li>
+                      <li class="mb-1">Integration with your existing inventory system</li>
+                      <li class="mb-1">Mobile-responsive design for all device types</li>
+                      <li>Enhanced checkout process to improve conversion rates</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="mb-4">
+                    <h4 class="font-bold mb-2">Timeline & Deliverables</h4>
+                    <p class="mb-2">We estimate this project will require 10-12 weeks to complete, broken down as follows:</p>
+                    <ul class="list-disc pl-5 mb-4">
+                      <li class="mb-1"><strong>Weeks 1-2:</strong> Discovery & Planning</li>
+                      <li class="mb-1"><strong>Weeks 3-4:</strong> Design Concepts & Approval</li>
+                      <li class="mb-1"><strong>Weeks 5-8:</strong> Development & Integration</li>
+                      <li class="mb-1"><strong>Weeks 9-10:</strong> Testing & Quality Assurance</li>
+                      <li><strong>Weeks 11-12:</strong> Launch Preparation & Go-Live</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="mb-4">
+                    <h4 class="font-bold mb-2">Investment</h4>
+                    <p>Based on the requirements discussed, our professional estimate for this project is <strong>$25,000</strong>. This includes all design, development, testing, and deployment services outlined in this proposal.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-6 py-3 flex items-center justify-between">
+          <div class="flex items-center">
+            <input type="checkbox" id="proposal-track" class="mr-2">
+            <label for="proposal-track" class="text-sm text-gray-600">Track opens and views</label>
+          </div>
+          <div class="flex gap-3">
+            <button @click="showProposalModal = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+              Save Draft
+            </button>
+            <button class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2" @click="isLoading = true; setTimeout(() => { isLoading = false; showProposalModal = false; }, 1500)">
+              <template x-if="isLoading">
+                <i class="fa-solid fa-circle-notch spinner mr-2"></i>
+              </template>
+              <template x-if="!isLoading">
+                <i class="fa-solid fa-paper-plane mr-2"></i>
+              </template>
+              Send Proposal
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- New Lead Modal -->
+  <div x-show="showLeadModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" @click="showLeadModal = false">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Lead</h3>
+            <button @click="showLeadModal = false" class="text-gray-500 hover:text-gray-700">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Company Name *</label>
+              <input type="text" placeholder="Enter company name" class="form-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+              <input type="url" placeholder="https://" class="form-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Contact Name *</label>
+              <input type="text" placeholder="Enter contact name" class="form-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Position/Title</label>
+              <input type="text" placeholder="Enter position/title" class="form-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+              <input type="email" placeholder="email@example.com" class="form-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input type="tel" placeholder="+1 (000) 000-0000" class="form-input w-full">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Lead Source</label>
+              <select class="form-input w-full">
+                <option>Website</option>
+                <option>Referral</option>
+                <option>Social Media</option>
+                <option>Email Campaign</option>
+                <option>Event</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Estimated Budget</label>
+              <input type="text" placeholder="$0.00" class="form-input w-full">
+            </div>
+            <div class="col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Project Type</label>
+              <select class="form-input w-full">
+                <option>Single-Page Website</option>
+                <option>Business Dashboard</option>
+                <option>E-commerce Website</option>
+                <option>Event Website</option>
+                <option>Full-Stack Development</option>
+              </select>
+            </div>
+            <div class="col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <textarea rows="3" placeholder="Enter any additional information about this lead" class="form-input w-full"></textarea>
+            </div>
+            <div class="col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+              <select class="form-input w-full">
+                <option>Unassigned</option>
+                <option>John Doe (You)</option>
+                <option>Sarah Miller</option>
+                <option>James Chen</option>
+                <option>Alex Rodriguez</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-6 py-3 flex justify-end">
+          <button @click="showLeadModal = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 mr-3">
+            Cancel
+          </button>
+          <button class="btn-primary px-4 py-2 rounded-lg" @click="isLoading = true; setTimeout(() => { isLoading = false; showLeadModal = false; }, 1500)">
+            <template x-if="isLoading">
+              <i class="fa-solid fa-circle-notch spinner mr-2"></i>
+            </template>
+            Save Lead
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- New Invoice Modal -->
+  <div x-show="showInvoiceModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 transition-opacity" @click="showInvoiceModal = false">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+        <div class="bg-white px-6 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Create Invoice</h3>
+            <button @click="showInvoiceModal = false" class="text-gray-500 hover:text-gray-700">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+          
+          <div x-data="{ invoiceType: 'fixed' }" class="space-y-6">
+            <div class="grid grid-cols-3 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                <select class="form-input w-full">
+                  <option>Quantum Analytics</option>
+                  <option>Vitality Fitness</option>
+                  <option>Nova Health Clinic</option>
+                  <option>Stellar Properties</option>
+                  <option>Horizon Events</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Invoice Number</label>
+                <input type="text" value="INV-2025-0043" class="form-input w-full bg-gray-50" readonly>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input type="date" value="2025-06-23" class="form-input w-full">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Invoice Type</label>
+              <div class="flex gap-4">
+                <label class="flex items-center">
+                  <input type="radio" name="invoiceType" value="fixed" x-model="invoiceType" class="mr-2">
+                  Fixed Price
+                </label>
+                <label class="flex items-center">
+                  <input type="radio" name="invoiceType" value="hourly" x-model="invoiceType" class="mr-2">
+                  Logged Hours
+                </label>
+              </div>
+            </div>
+            
+            <div x-show="invoiceType === 'fixed'">
+              <div class="border border-gray-200 rounded-lg">
+                <table class="w-full">
+                  <thead class="bg-gray-50 text-left">
+                    <tr>
+                      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    <tr>
+                      <td class="px-6 py-3">
+                        <input type="text" value="Website Design" class="form-input w-full">
+                      </td>
+                      <td class="px-6 py-3">
+                        <input type="number" value="1" class="form-input w-full">
+                      </td>
+                      <td class="px-6 py-3">
+                        <input type="text" value="5000.00" class="form-input w-full">
+                      </td>
+                      <td class="px-6 py-3">
+                        <span class="font-medium">$5,000.00</span>
+                      </td>
+                      <td class="px-6 py-3">
+                        <button class="text-gray-400 hover:text-red-500">
+                          <i class="fa-solid fa-trash-alt"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="px-6 py-3">
+                        <input type="text" value="Development" class="form-input w-full">
+                      </td>
+                      <td class="px-6 py-3">
+                        <input type="number" value="1" class="form-input w-full">
+                      </td>
+                      <td class="px-6 py-3">
+                        <input type="text" value="7500.00" class="form-input w-full">
+                      </td>
+                      <td class="px-6 py-3">
+                        <span class="font-medium">$7,500.00</span>
+                      </td>
+                      <td class="px-6 py-3">
+                        <button class="text-gray-400 hover:text-red-500">
+                          <i class="fa-solid fa-trash-alt"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="px-6 py-3" colspan="5">
+                        <button class="text-primary-blue hover:text-accent-blue text-sm flex items-center">
+                          <i class="fa-solid fa-plus mr-1"></i> Add Line Item
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div x-show="invoiceType === 'hourly'" class="border border-gray-200 rounded-lg">
+              <table class="w-full">
+                <thead class="bg-gray-50 text-left">
+                  <tr>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="px-6 py-3">UI Design for Dashboard</td>
+                    <td class="px-6 py-3">Sarah Miller</td>
+                    <td class="px-6 py-3">4.5</td>
+                    <td class="px-6 py-3">$125.00</td>
+                    <td class="px-6 py-3 font-medium">$562.50</td>
+                    <td class="px-6 py-3">
+                      <input type="checkbox" checked>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-6 py-3">Backend API Development</td>
+                    <td class="px-6 py-3">James Chen</td>
+                    <td class="px-6 py-3">8.0</td>
+                    <td class="px-6 py-3">$150.00</td>
+                    <td class="px-6 py-3 font-medium">$1,200.00</td>
+                    <td class="px-6 py-3">
+                      <input type="checkbox" checked>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-6 py-3">Wireframe Review</td>
+                    <td class="px-6 py-3">Alex Rodriguez</td>
+                    <td class="px-6 py-3">2.5</td>
+                    <td class="px-6 py-3">$125.00</td>
+                    <td class="px-6 py-3 font-medium">$312.50</td>
+                    <td class="px-6 py-3">
+                      <input type="checkbox" checked>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="flex justify-end">
+              <div class="w-1/3 space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Subtotal:</span>
+                  <span class="font-medium">$12,500.00</span>
+                </div>
+                <div class="flex justify-between">
+                  <div class="flex items-center">
+                    <span class="text-gray-600 mr-2">Tax:</span>
+                    <input type="text" value="0" class="form-input w-16 py-1 text-right">
+                    <span class="ml-1">%</span>
+                  </div>
+                  <span class="font-medium">$0.00</span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-gray-200">
+                  <span class="text-gray-800 font-medium">Total:</span>
+                  <span class="font-bold text-lg">$12,500.00</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <textarea rows="2" placeholder="Enter any additional information for the client" class="form-input w-full"></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 px-6 py-3 flex items-center justify-between">
+          <div>
+            <button class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm">
+              Preview <i class="fa-solid fa-eye ml-1"></i>
+            </button>
+          </div>
+          
+          <div class="flex gap-3">
+            <button @click="showInvoiceModal = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">
+              Save as Draft
+            </button>
+            <button class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2" @click="isLoading = true; setTimeout(() => { isLoading = false; showInvoiceModal = false; }, 1500)">
+              <template x-if="isLoading">
+                <i class="fa-solid fa-circle-notch spinner mr-2"></i>
+              </template>
+              <template x-if="!isLoading">
+                <i class="fa-solid fa-paper-plane mr-2"></i>
+              </template>
+              Send Invoice
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script id="app-script">
+    document.addEventListener('alpine:init', () => {
+      // Initialize the sortable kanban board
+      const kanbanColumns = document.querySelectorAll('.kanban-cards');
+      
+      kanbanColumns.forEach(column => {
+        new Sortable(column, {
+          group: 'kanban',
+          animation: 150,
+          ghostClass: 'bg-gray-100',
+          onEnd: function(evt) {
+            // This would be where API calls happen to update the lead stage
+            console.log("Card moved from " + evt.from.id + " to " + evt.to.id);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascade Creations | Full-Stack Developer Portfolio</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="shortcut icon" href="imgs/cclogo.png" type="image/x-icon">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button id="darkModeToggle" class="dark-mode-toggle">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#home">
+                <img src="imgs/logo.png" 
+                     alt="Cascade Creations Logo" 
+                     class="navbar-logo">
+                     <span class="navlogoname">Cascade Creations</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home"><i class="fas fa-home"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about"><i class="fas fa-user"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services"><i class="fas fa-cogs"></i> Process</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing"><i class="fas fa-tags"></i> Packages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact"><i class="fas fa-envelope"></i> Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link studio-link" href="#contact"><i class="fas fa-rocket"></i> Studio</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="particle-container" id="particle-container"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center hero-content">
+                  <img src="imgs/logo.png" style="max-width: 250px;" alt="">
+                    <h1 class="hero-title" data-aos="fade-up">Cascade Creations</h1>
+                    <p class="hero-tagline" data-aos="fade-up" data-aos-delay="200">
+                        imagination Meets Functionality
+                    </p>
+                    <div class="btn-group" data-aos="fade-up" data-aos-delay="400">
+                        <a href="#portfolio" class="btn btn-primary">What We Do</a>
+                        <a href="#contact" class="btn btn-outline">Get In Touch</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-down">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2 class="section-title text-center" data-aos="fade-up">About Cascade Creations</h2>
+            <div class="row mt-5">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h3>Creating Digital Solutions That Flow Naturally</h3>
+                    <p class="lead">
+                        At Cascade Creations, we specialize in building seamless, responsive web applications that cascade from concept to completion with precision and creativity.
+                    </p>
+                    <p>
+                        Our approach combines innovative design with robust engineering to deliver digital experiences that not only look stunning but perform exceptionally across all devices and platforms.
+                    </p>
+                </div>
+                <div class="col-lg-6" id="tech-stack" data-aos="fade-left">
+                    <div class="row text-center">
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="tech-icon html-icon">
+                                <i class="fab fa-html5"></i>
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="tech-icon css-icon">
+                                <i class="fab fa-css3-alt"></i>
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="tech-icon js-icon">
+                                <i class="fab fa-js"></i>
+                            </div>
+                           
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="tech-icon react-icon">
+                                <i class="fab fa-react"></i>
+                            </div>
+                           
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="tech-icon backend-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                           
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-4">
+                            <div class="tech-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <h2 class="section-title text-center" data-aos="fade-up">Our Creative Process</h2>
+            <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+                Following a cascade of carefully orchestrated steps to ensure project success
+            </p>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in">
+                    <div class="process-card">
+                        <div class="process-number">1</div>
+                        <div class="process-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h4>Concept</h4>
+                        <p>Understanding your vision through detailed consultation and requirement analysis.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="process-card">
+                        <div class="process-number">2</div>
+                        <div class="process-icon">
+                            <i class="fas fa-pencil-ruler"></i>
+                        </div>
+                        <h4>Design</h4>
+                        <p>Creating wireframes and visual designs that align with your brand identity.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="process-card">
+                        <div class="process-number">3</div>
+                        <div class="process-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h4>Development</h4>
+                        <p>Building robust, scalable solutions using modern technologies and best practices.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="process-card">
+                        <div class="process-number">4</div>
+                        <div class="process-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h4>Launch</h4>
+                        <p>Deployment, testing, and ongoing support to ensure everything runs smoothly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+     <!-- What We Are Known For Section -->
+    <section id="portfolio" class="portfolio-section">
+        <div class="container">
+            <h2 class="section-title text-center" data-aos="fade-up">What We Are Known For</h2>
+            <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+                Our expertise in delivering exceptional digital experiences
+            </p>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" data-aos="fade-up">
+                    <div class="portfolio-card">
+                        <div class="portfolio-image">
+                            <img src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Responsive Design">
+                            <div class="portfolio-overlay">
+                                <div class="portfolio-icons">
+                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="portfolio-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="portfolio-content">
+                            <h4>Large Screen to Mobile View 100%</h4>
+                            <p>Fully responsive designs that adapt perfectly to all screen sizes from desktop to mobile.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="portfolio-card">
+                        <div class="portfolio-image">
+                            <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Interactive Websites">
+                            <div class="portfolio-overlay">
+                                <div class="portfolio-icons">
+                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="portfolio-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="portfolio-content">
+                            <h4>Website Interactiveness</h4>
+                            <p>Engaging user experiences with smooth animations, transitions, and interactive elements.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="portfolio-card">
+                        <div class="portfolio-image">
+                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Modern Design">
+                            <div class="portfolio-overlay">
+                                <div class="portfolio-icons">
+                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="portfolio-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="portfolio-content">
+                            <h4>Modern Designs</h4>
+                            <p>Contemporary aesthetics with clean lines, bold typography, and innovative layouts.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="portfolio-card">
+                        <div class="portfolio-image">
+                            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Custom Solutions">
+                            <div class="portfolio-overlay">
+                                <div class="portfolio-icons">
+                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="portfolio-icon">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="portfolio-content">
+                            <h4>Custom Solutions</h4>
+                            <p>Tell us what you desire. We create tailored solutions that perfectly match your unique vision.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section id="video" class="video-section">
+        <div class="container">
+            <h2 class="section-title text-center" data-aos="fade-up">Creation in Action</h2>
+            <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+                See our development process and previous work
+            </p>
+            <div class="row">
+                <div class="col-lg-10 mx-auto" data-aos="zoom-in">
+                    <div class="video-container">
+                        <video id="portfolioVideo" preload="metadata">
+                            <source src="imgs/vid1.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="video-overlay">
+                            <button id="playButton" class="play-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services/Pricing Section -->
+    <section id="pricing" class="services-section-pricing">
+        <div class="container">
+            <h2 class="section-title text-center" data-aos="fade-up">Service Packages</h2>
+            <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+                Choose the package that fits your creative needs
+            </p>
+            <div class="row g-4">
+                <div class="col-lg-4" data-aos="fade-up">
+                    <div class="service-package-card">
+                        <h4>Basic Website</h4>
+                        <p class="service-description">Perfect for small businesses and personal portfolios</p>
+                        <div class="package-features">
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>5 Pages Website</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Responsive Design</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Basic SEO</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Contact Form</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>1 Month Support</span>
+                            </div>
+                        </div>
+                        <a href="#contact" class="btn btn-primary">Get Quote</a>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-package-card">
+                        <div class="popular-badge">Most Popular</div>
+                        <h4>Business Package</h4>
+                        <p class="service-description">Ideal for growing businesses and e-commerce</p>
+                        <div class="package-features">
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Up to 15 Pages</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>E-commerce Functionality</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Advanced SEO</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>CMS Integration</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>3 Months Support</span>
+                            </div>
+                        </div>
+                        <a href="#contact" class="btn btn-primary">Get Quote</a>
+                    </div>
+                </div>
+                <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-package-card">
+                        <h4>Custom Solution</h4>
+                        <p class="service-description">Tailored solutions for unique business needs</p>
+                        <div class="package-features">
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Custom Design & Development</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Full-stack Application</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>API Development</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>Database Design</span>
+                            </div>
+                            <div class="package-feature">
+                                <i class="fas fa-check"></i>
+                                <span>6 Months Support</span>
+                            </div>
+                        </div>
+                        <a href="#contact" class="btn btn-primary">Get Quote</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="300">
+                <p class="note-text">All packages include mobile-responsive design, hosting setup, and basic training.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="cta-title" data-aos="fade-up">Ready to Start Your Creative Project?</h2>
+                    <p class="cta-text" data-aos="fade-up" data-aos-delay="200">
+                        Let Cascade Creations bring your ideas to life. Contact us today to discuss your project requirements and get a free consultation.
+                    </p>
+                    <a href="#contact" class="btn cta-btn" data-aos="zoom-in" data-aos-delay="400">
+                        Start Your Project <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title text-center" data-aos="fade-up">Contact Cascade Creations</h2>
+            <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
+                Have a project in mind? Let's discuss how we can help you achieve your creative goals.
+            </p>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="contact-form" data-aos="fade-up" data-aos-delay="300">
+                        <form id="contactForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="service" class="form-label">Service Interested In</label>
+                                <select class="form-control" id="service" required>
+                                    <option value="">Select a service</option>
+                                    <option value="Basic Website">Basic Website</option>
+                                    <option value="Business Package">Business Package</option>
+                                    <option value="Custom Solution">Custom Solution</option>
+                                    <option value="Consultation">Consultation</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="project" class="form-label">Project Details</label>
+                                <textarea class="form-control" id="project" rows="4" required></textarea>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-submit" id="submitBtn">
+                                    <span class="btn-text"><i class="fas fa-paper-plane me-2"></i> Submit</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="row mt-5" data-aos="fade-up" data-aos-delay="400">
+                        <div class="col-md-6 text-center mb-4">
+                            <div class="contact-info-box">
+                                <i class="fas fa-phone fa-2x mb-3" style="color: var(--primary-color);"></i>
+                                <h4>Phone</h4>
+                                <p>072 078 6569</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center mb-4">
+                            <div class="contact-info-box">
+                                <i class="fas fa-envelope fa-2x mb-3" style="color: var(--primary-color);"></i>
+                                <h4>Email</h4>
+                                <p>atsello4@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="col-12 text-center mt-2">
+                            <div class="contact-info-box">
+                                <i class="fas fa-map-marker-alt fa-2x mb-3" style="color: var(--primary-color);"></i>
+                                <h4>Location</h4>
+                                <p>Pretoria, Gauteng, South Africa</p>
+                            </div>
+                        </div>
+                    </div>
+                  
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Lightbox -->
+    <div id="imageLightbox" class="image-lightbox">
+        <div class="lightbox-content">
+            <span class="close-lightbox">&times;</span>
+            <img id="lightboxImage" src="" alt="Portfolio Image">
+            <div class="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 footer-col">
+                    <div class="footer-logo">
+                        <img src="imgs/logo.png" 
+                             alt="Cascade Creations Logo" 
+                             class="footer-logo-img">
+                    </div>
+                    <p class="footer-about">
+                        Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications that cascade from concept to completion with precision and creativity.
+                    </p>
+                    <div class="footer-social">
+                       
+                        <a href="https://github.com/Alex-Sello7"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 footer-col">
+                    <h5 class="footer-heading">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="#home"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li><a href="#about"><i class="fas fa-chevron-right"></i> About</a></li>
+                        <li><a href="#services"><i class="fas fa-chevron-right"></i> Process</a></li>
+                        
+                        <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12 footer-col">
+                    <h5 class="footer-heading">Contact Info</h5>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Pretoria, Gauteng, South Africa</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span>072 078 6569</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>atsello4@gmail.com</span>
+                        </li>
+                    </ul>
+                   
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="copyright">© 2023 Cascade Creations. All rights reserved.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-bottom-links">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="index.js"></script>
+
+        <!-- Bubble Trail Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create bubble container
+            const bubbleContainer = document.createElement('div');
+            bubbleContainer.id = 'bubble-container';
+            document.body.appendChild(bubbleContainer);
+            
+            // Variables to track mouse position
+            let mouseX = 0;
+            let mouseY = 0;
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+            let mouseVelocity = 0;
+            
+            // Track mouse movement
+            document.addEventListener('mousemove', (e) => {
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                // Calculate mouse velocity
+                const deltaX = mouseX - lastMouseX;
+                const deltaY = mouseY - lastMouseY;
+                mouseVelocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                // Only create bubbles if mouse is moving with some speed
+                if (mouseVelocity > 1) {
+                    createBubbleTrail();
+                }
+            });
+            
+            function createBubbleTrail() {
+                // Number of bubbles based on mouse velocity
+                const bubbleCount = Math.min(Math.floor(mouseVelocity / 10), 5);
+                
+                for (let i = 0; i < bubbleCount; i++) {
+                    // Create bubble
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    
+                    // Random size between 5-20px
+                    const size = Math.random() * 15 + 5;
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    
+                    // Random position around cursor
+                    const offsetX = (Math.random() - 0.5) * 40;
+                    const offsetY = (Math.random() - 0.5) * 40;
+                    
+                    bubble.style.left = `${mouseX + offsetX}px`;
+                    bubble.style.top = `${mouseY + offsetY}px`;
+                    
+                    // Random color variation
+                    const hue = 200 + Math.random() * 60; // Blue-ish range
+                    const saturation = 70 + Math.random() * 30;
+                    const lightness = 60 + Math.random() * 20;
+                    bubble.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                    
+                    // Random opacity
+                    const opacity = 0.3 + Math.random() * 0.4;
+                    bubble.style.opacity = opacity;
+                    
+                    // Add to container
+                    bubbleContainer.appendChild(bubble);
+                    
+                    // Animate bubble
+                    const animationDuration = 0.8 + Math.random() * 0.7;
+                    
+                    // Random movement
+                    const moveX = (Math.random() - 0.5) * 100;
+                    const moveY = (Math.random() - 0.5) * 100;
+                    
+                    bubble.animate([
+                        {
+                            transform: `translate(0, 0) scale(1)`,
+                            opacity: opacity
+                        },
+                        {
+                            transform: `translate(${moveX}px, ${moveY}px) scale(0.3)`,
+                            opacity: 0
+                        }
+                    ], {
+                        duration: animationDuration * 1000,
+                        easing: 'cubic-bezier(0.2, 0, 0.8, 1)'
+                    });
+                    
+                    // Remove bubble after animation
+                    setTimeout(() => {
+                        if (bubble.parentNode) {
+                            bubble.remove();
+                        }
+                    }, animationDuration * 1000);
+                }
+            }
+            
+            // Reduce bubble frequency on mobile/touch devices
+            if ('ontouchstart' in window || navigator.maxTouchPoints) {
+                // Still create some bubbles but less frequently
+                setInterval(() => {
+                    if (mouseVelocity > 1) {
+                        createBubbleTrail();
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
