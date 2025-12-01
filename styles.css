@@ -26,6 +26,245 @@
   --card-border-dark: #333;
 }
 
+/* ===== LOADER ===== */
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.loader-container {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+    animation: loaderFadeIn 0.5s ease;
+}
+
+@keyframes loaderFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo-loader {
+    margin-bottom: 40px;
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+.logo-loader img {
+    width: 150px;
+    height: 150px;
+    border-radius: 20px;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+    object-fit: contain;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-10px) rotate(2deg);
+    }
+    75% {
+        transform: translateY(-5px) rotate(-2deg);
+    }
+}
+
+
+.loader-text {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 30px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.letter {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    animation: letterWave 1.5s ease-in-out infinite;
+    display: inline-block;
+}
+
+/* Staggered animation for each letter */
+.letter:nth-child(1) { animation-delay: 0s; }
+.letter:nth-child(2) { animation-delay: 0.05s; }
+.letter:nth-child(3) { animation-delay: 0.1s; }
+.letter:nth-child(4) { animation-delay: 0.15s; }
+.letter:nth-child(5) { animation-delay: 0.2s; }
+.letter:nth-child(6) { animation-delay: 0.25s; }
+.letter:nth-child(7) { animation-delay: 0.3s; }
+/* Second word starts with delay */
+.letter:nth-child(8) { animation-delay: 0.5s; }
+.letter:nth-child(9) { animation-delay: 0.55s; }
+.letter:nth-child(10) { animation-delay: 0.6s; }
+.letter:nth-child(11) { animation-delay: 0.65s; }
+.letter:nth-child(12) { animation-delay: 0.7s; }
+.letter:nth-child(13) { animation-delay: 0.75s; }
+.letter:nth-child(14) { animation-delay: 0.8s; }
+.letter:nth-child(15) { animation-delay: 0.85s; }
+.letter:nth-child(16) { animation-delay: 0.9s; }
+
+@keyframes letterWave {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        color: white;
+    }
+    25% {
+        transform: translateY(-15px) scale(1.1);
+        color: #a3d9ff;
+    }
+    50% {
+        transform: translateY(0) scale(1);
+        color: white;
+    }
+}
+
+.loader-progress {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #a3d9ff, #4cc9f0, #4299e1);
+    border-radius: 10px;
+    position: relative;
+    animation: progressAnimation 2s ease-in-out infinite;
+}
+
+@keyframes progressAnimation {
+    0% {
+        width: 0%;
+        left: 0;
+    }
+    50% {
+        width: 100%;
+        left: 0;
+    }
+    100% {
+        width: 0%;
+        left: 100%;
+    }
+}
+
+.loader-tagline {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
+    font-family: 'Roboto', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: taglinePulse 2s ease-in-out infinite;
+}
+
+@keyframes taglinePulse {
+    0%, 100% {
+        opacity: 0.7;
+        letter-spacing: 2px;
+    }
+    50% {
+        opacity: 1;
+        letter-spacing: 3px;
+    }
+}
+
+.loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Dark mode loader adjustments */
+.dark-mode .loader {
+    background: linear-gradient(135deg, #0a192f, #112240);
+}
+
+.dark-mode .loader-content {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .loader-container {
+        padding: 20px;
+    }
+    
+    .logo-loader img {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .letter {
+        font-size: 1.8rem;
+    }
+    
+    .loader-content {
+        padding: 30px 20px;
+    }
+    
+    .loader-tagline {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .loader-text {
+        gap: 2px;
+    }
+    
+    .letter {
+        font-size: 1.4rem;
+    }
+    
+    .logo-loader {
+        margin-bottom: 20px;
+    }
+    
+    .logo-loader img {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .letter,
+    .logo-loader,
+    .progress-bar,
+    .loader-tagline {
+        animation: none !important;
+    }
+    
+    .progress-bar {
+        animation: none;
+        width: 100%;
+        background: #4299e1;
+    }
+}
+
 /* ===== BASE STYLES ===== */
 * {
   margin: 0;
@@ -1090,7 +1329,7 @@ body.dark-mode {
 /* ===== RESPONSIVE STYLES ===== */
 
 /* Hide tech-stack on screens 425px and smaller */
-@media screen and (max-width: 425px) {
+@media screen and (max-width: 600px) {
   #tech-stack {
     display: none !important;
   }
