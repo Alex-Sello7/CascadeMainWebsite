@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Cascade Creations | Full-Stack Developer Portfolio</title>
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <!-- AOS Animation Library -->
@@ -15,27 +16,28 @@
     <link rel="shortcut icon" href="imgs/cclogo.png" type="image/x-icon">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- HTML5 Shiv for IE8 and below -->
+    <!--[if lt IE 9]>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
+    <!--[if lt IE 8]>
+        <div class="browser-update">
+            <p>You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        </div>
+    <![endif]-->
+    
     <!-- Dark Mode Toggle -->
-    <button id="darkModeToggle" class="dark-mode-toggle">
+    <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
         <i class="fas fa-moon"></i>
     </button>
-
-        <!-- Loader -->
-    <div class="loader">
-        <div class="loader-container">
-            <div class="logo-loader">
-                <img src="imgs/logo.png" alt="Cascade Creations Logo">
-            </div>
-            <div class="loader-content">
-                <div class="loader-progress">
-                    <div class="progress-bar"></div>
-                </div>
-                <p class="loader-tagline">Imagination Meets Functionality</p>
-            </div>
-        </div>
-    </div>
 
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
@@ -46,7 +48,7 @@
                      class="navbar-logo">
                      <span class="navlogoname">Cascade Creations</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -60,7 +62,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#services"><i class="fas fa-cogs"></i> Process</a>
                     </li>
-                    
                     <li class="nav-item">
                         <a class="nav-link" href="#pricing"><i class="fas fa-tags"></i> Packages</a>
                     </li>
@@ -68,7 +69,7 @@
                         <a class="nav-link" href="#contact"><i class="fas fa-envelope"></i> Contact</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link studio-link" href="#contact"><i class="fas fa-rocket"></i> Studio</a>
+                        <a class="nav-link studio-link" href="https://alex-sello7.github.io/CascadeComingSoon/"><i class="fas fa-rocket"></i> Studio</a>
                     </li>
                 </ul>
             </div>
@@ -81,10 +82,10 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-8 mx-auto text-center hero-content">
-                  <img src="imgs/logo.png" style="max-width: 250px;" alt="">
+                  <img src="imgs/logo.png" style="max-width: 250px;" alt="Cascade Creations Logo">
                     <h1 class="hero-title" data-aos="fade-up">Cascade Creations</h1>
                     <p class="hero-tagline" data-aos="fade-up" data-aos-delay="200">
-                        imagination Meets Functionality
+                        Imagination Meets Functionality
                     </p>
                     <div class="btn-group" data-aos="fade-up" data-aos-delay="400">
                         <a href="#portfolio" class="btn btn-primary">What We Do</a>
@@ -116,39 +117,33 @@
                     <div class="row text-center">
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="tech-icon html-icon">
-                                <i class="fab fa-html5"></i>
+                                <i class="fab fa-html5" aria-hidden="true"></i>
                             </div>
-                            
                         </div>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="tech-icon css-icon">
-                                <i class="fab fa-css3-alt"></i>
+                                <i class="fab fa-css3-alt" aria-hidden="true"></i>
                             </div>
-                            
                         </div>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="tech-icon js-icon">
-                                <i class="fab fa-js"></i>
+                                <i class="fab fa-js" aria-hidden="true"></i>
                             </div>
-                           
                         </div>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="tech-icon react-icon">
-                                <i class="fab fa-react"></i>
+                                <i class="fab fa-react" aria-hidden="true"></i>
                             </div>
-                           
                         </div>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="tech-icon backend-icon">
-                                <i class="fas fa-server"></i>
+                                <i class="fas fa-server" aria-hidden="true"></i>
                             </div>
-                           
                         </div>
                         <div class="col-md-4 col-sm-6 mb-4">
                             <div class="tech-icon">
-                                <i class="fas fa-database"></i>
+                                <i class="fas fa-database" aria-hidden="true"></i>
                             </div>
-                            
                         </div>
                     </div>
                 </div>
@@ -168,7 +163,7 @@
                     <div class="process-card">
                         <div class="process-number">1</div>
                         <div class="process-icon">
-                            <i class="fas fa-lightbulb"></i>
+                            <i class="fas fa-lightbulb" aria-hidden="true"></i>
                         </div>
                         <h4>Concept</h4>
                         <p>Understanding your vision through detailed consultation and requirement analysis.</p>
@@ -178,7 +173,7 @@
                     <div class="process-card">
                         <div class="process-number">2</div>
                         <div class="process-icon">
-                            <i class="fas fa-pencil-ruler"></i>
+                            <i class="fas fa-pencil-ruler" aria-hidden="true"></i>
                         </div>
                         <h4>Design</h4>
                         <p>Creating wireframes and visual designs that align with your brand identity.</p>
@@ -188,7 +183,7 @@
                     <div class="process-card">
                         <div class="process-number">3</div>
                         <div class="process-icon">
-                            <i class="fas fa-code"></i>
+                            <i class="fas fa-code" aria-hidden="true"></i>
                         </div>
                         <h4>Development</h4>
                         <p>Building robust, scalable solutions using modern technologies and best practices.</p>
@@ -198,7 +193,7 @@
                     <div class="process-card">
                         <div class="process-number">4</div>
                         <div class="process-icon">
-                            <i class="fas fa-rocket"></i>
+                            <i class="fas fa-rocket" aria-hidden="true"></i>
                         </div>
                         <h4>Launch</h4>
                         <p>Deployment, testing, and ongoing support to ensure everything runs smoothly.</p>
@@ -208,7 +203,7 @@
         </div>
     </section>
 
-     <!-- What We Are Known For Section -->
+    <!-- What We Are Known For Section -->
     <section id="portfolio" class="portfolio-section">
         <div class="container">
             <h2 class="section-title text-center" data-aos="fade-up">What We Are Known For</h2>
@@ -221,14 +216,7 @@
                         <div class="portfolio-image">
                             <img src="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Responsive Design">
                             <div class="portfolio-overlay">
-                                <div class="portfolio-icons">
-                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1581276879432-15e50529f34b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="portfolio-icon">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
+                                
                             </div>
                         </div>
                         <div class="portfolio-content">
@@ -242,14 +230,7 @@
                         <div class="portfolio-image">
                             <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Interactive Websites">
                             <div class="portfolio-overlay">
-                                <div class="portfolio-icons">
-                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="portfolio-icon">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
+                                
                             </div>
                         </div>
                         <div class="portfolio-content">
@@ -263,14 +244,7 @@
                         <div class="portfolio-image">
                             <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Modern Design">
                             <div class="portfolio-overlay">
-                                <div class="portfolio-icons">
-                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="portfolio-icon">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
+                                
                             </div>
                         </div>
                         <div class="portfolio-content">
@@ -284,14 +258,7 @@
                         <div class="portfolio-image">
                             <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Custom Solutions">
                             <div class="portfolio-overlay">
-                                <div class="portfolio-icons">
-                                    <a href="#" class="portfolio-icon view-image" data-image="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="portfolio-icon">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
+                                
                             </div>
                         </div>
                         <div class="portfolio-content">
@@ -314,13 +281,13 @@
             <div class="row">
                 <div class="col-lg-10 mx-auto" data-aos="zoom-in">
                     <div class="video-container">
-                        <video id="portfolioVideo" preload="metadata">
+                        <video id="portfolioVideo" preload="metadata" playsinline>
                             <source src="imgs/vid1.mp4" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                         <div class="video-overlay">
-                            <button id="playButton" class="play-btn">
-                                <i class="fas fa-play"></i>
+                            <button id="playButton" class="play-btn" aria-label="Play video">
+                                <i class="fas fa-play" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -343,23 +310,23 @@
                         <p class="service-description">Perfect for small businesses and personal portfolios</p>
                         <div class="package-features">
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>5 Pages Website</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Responsive Design</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Basic SEO</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Contact Form</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>1 Month Support</span>
                             </div>
                         </div>
@@ -373,23 +340,23 @@
                         <p class="service-description">Ideal for growing businesses and e-commerce</p>
                         <div class="package-features">
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Up to 15 Pages</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>E-commerce Functionality</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Advanced SEO</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>CMS Integration</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>3 Months Support</span>
                             </div>
                         </div>
@@ -402,23 +369,23 @@
                         <p class="service-description">Tailored solutions for unique business needs</p>
                         <div class="package-features">
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Custom Design & Development</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Full-stack Application</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>API Development</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>Database Design</span>
                             </div>
                             <div class="package-feature">
-                                <i class="fas fa-check"></i>
+                                <i class="fas fa-check" aria-hidden="true"></i>
                                 <span>6 Months Support</span>
                             </div>
                         </div>
@@ -442,7 +409,7 @@
                         Let Cascade Creations bring your ideas to life. Contact us today to discuss your project requirements and get a free consultation.
                     </p>
                     <a href="#contact" class="btn cta-btn" data-aos="zoom-in" data-aos-delay="400">
-                        Start Your Project <i class="fas fa-arrow-right ms-2"></i>
+                        Start Your Project <i class="fas fa-arrow-right ms-2" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -459,7 +426,7 @@
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <div class="contact-form" data-aos="fade-up" data-aos-delay="300">
-                        <form id="contactForm">
+                        <form id="contactForm" novalidate>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -491,7 +458,7 @@
                             </div>
                             <div class="text-center">
                                 <button type="submit" class="btn btn-submit" id="submitBtn">
-                                    <span class="btn-text"><i class="fas fa-paper-plane me-2"></i> Submit</span>
+                                    <span class="btn-text"><i class="fas fa-paper-plane me-2" aria-hidden="true"></i> Submit</span>
                                 </button>
                             </div>
                         </form>
@@ -501,36 +468,35 @@
                     <div class="row mt-5" data-aos="fade-up" data-aos-delay="400">
                         <div class="col-md-6 text-center mb-4">
                             <div class="contact-info-box">
-                                <i class="fas fa-phone fa-2x mb-3" style="color: var(--primary-color);"></i>
+                                <i class="fas fa-phone fa-2x mb-3" aria-hidden="true"></i>
                                 <h4>Phone</h4>
                                 <p>072 078 6569</p>
                             </div>
                         </div>
                         <div class="col-md-6 text-center mb-4">
                             <div class="contact-info-box">
-                                <i class="fas fa-envelope fa-2x mb-3" style="color: var(--primary-color);"></i>
+                                <i class="fas fa-envelope fa-2x mb-3" aria-hidden="true"></i>
                                 <h4>Email</h4>
                                 <p>atsello4@gmail.com</p>
                             </div>
                         </div>
                         <div class="col-12 text-center mt-2">
                             <div class="contact-info-box">
-                                <i class="fas fa-map-marker-alt fa-2x mb-3" style="color: var(--primary-color);"></i>
+                                <i class="fas fa-map-marker-alt fa-2x mb-3" aria-hidden="true"></i>
                                 <h4>Location</h4>
                                 <p>Pretoria, Gauteng, South Africa</p>
                             </div>
                         </div>
                     </div>
-                  
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Image Lightbox -->
-    <div id="imageLightbox" class="image-lightbox">
+    <div id="imageLightbox" class="image-lightbox" role="dialog" aria-label="Image lightbox" aria-hidden="true">
         <div class="lightbox-content">
-            <span class="close-lightbox">&times;</span>
+            <button class="close-lightbox" aria-label="Close lightbox">&times;</button>
             <img id="lightboxImage" src="" alt="Portfolio Image">
             <div class="lightbox-caption"></div>
         </div>
@@ -550,43 +516,40 @@
                         Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications that cascade from concept to completion with precision and creativity.
                     </p>
                     <div class="footer-social">
-                       
-                        <a href="https://github.com/Alex-Sello7"><i class="fab fa-github"></i></a>
+                        <a href="https://github.com/Alex-Sello7" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6 footer-col">
                     <h5 class="footer-heading">Quick Links</h5>
                     <ul class="footer-links">
-                        <li><a href="#home"><i class="fas fa-chevron-right"></i> Home</a></li>
-                        <li><a href="#about"><i class="fas fa-chevron-right"></i> About</a></li>
-                        <li><a href="#services"><i class="fas fa-chevron-right"></i> Process</a></li>
-                        
-                        <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                        <li><a href="#home"><i class="fas fa-chevron-right" aria-hidden="true"></i> Home</a></li>
+                        <li><a href="#about"><i class="fas fa-chevron-right" aria-hidden="true"></i> About</a></li>
+                        <li><a href="#services"><i class="fas fa-chevron-right" aria-hidden="true"></i> Process</a></li>
+                        <li><a href="#contact"><i class="fas fa-chevron-right" aria-hidden="true"></i> Contact</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4 col-md-12 footer-col">
                     <h5 class="footer-heading">Contact Info</h5>
                     <ul class="contact-info">
                         <li>
-                            <i class="fas fa-map-marker-alt"></i>
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                             <span>Pretoria, Gauteng, South Africa</span>
                         </li>
                         <li>
-                            <i class="fas fa-phone"></i>
+                            <i class="fas fa-phone" aria-hidden="true"></i>
                             <span>072 078 6569</span>
                         </li>
                         <li>
-                            <i class="fas fa-envelope"></i>
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
                             <span>atsello4@gmail.com</span>
                         </li>
                     </ul>
-                   
                 </div>
             </div>
             <div class="footer-bottom">
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="copyright">© 2023 Cascade Creations. All rights reserved.</p>
+                        <p class="copyright">© <span id="current-year">2023</span> Cascade Creations. All rights reserved.</p>
                     </div>
                     <div class="col-md-6">
                         <div class="footer-bottom-links">
@@ -601,121 +564,73 @@
 
     <!-- JavaScript Libraries -->
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
     <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <!-- Custom JS -->
     <script src="index.js"></script>
 
-        <!-- Bubble Trail Script -->
+    <!-- Polyfills for older browsers -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Create bubble container
-            const bubbleContainer = document.createElement('div');
-            bubbleContainer.id = 'bubble-container';
-            document.body.appendChild(bubbleContainer);
+        // Polyfill for requestAnimationFrame
+        (function() {
+            var lastTime = 0;
+            var vendors = ['ms', 'moz', 'webkit', 'o'];
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || 
+                window[vendors[x]+'CancelRequestAnimationFrame'];
+            }
             
-            // Variables to track mouse position
-            let mouseX = 0;
-            let mouseY = 0;
-            let lastMouseX = 0;
-            let lastMouseY = 0;
-            let mouseVelocity = 0;
+            if (!window.requestAnimationFrame)
+                window.requestAnimationFrame = function(callback) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+                    timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
             
-            // Track mouse movement
-            document.addEventListener('mousemove', (e) => {
-                lastMouseX = mouseX;
-                lastMouseY = mouseY;
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                
-                // Calculate mouse velocity
-                const deltaX = mouseX - lastMouseX;
-                const deltaY = mouseY - lastMouseY;
-                mouseVelocity = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                
-                // Only create bubbles if mouse is moving with some speed
-                if (mouseVelocity > 1) {
-                    createBubbleTrail();
+            if (!window.cancelAnimationFrame)
+                window.cancelAnimationFrame = function(id) {
+                    clearTimeout(id);
+                };
+        }());
+        
+        // Polyfill for classList in IE9
+        if (!("classList" in document.documentElement) && Object.defineProperty && typeof HTMLElement !== 'undefined') {
+            Object.defineProperty(HTMLElement.prototype, 'classList', {
+                get: function() {
+                    var self = this;
+                    function update(fn) {
+                        return function(value) {
+                            var classes = self.className.split(/\s+/);
+                            var index = classes.indexOf(value);
+                            fn(classes, index, value);
+                            self.className = classes.join(" ");
+                        };
+                    }
+                    return {
+                        add: update(function(classes, index, value) {
+                            if (!~index) classes.push(value);
+                        }),
+                        remove: update(function(classes, index) {
+                            if (~index) classes.splice(index, 1);
+                        }),
+                        toggle: update(function(classes, index, value) {
+                            if (~index) classes.splice(index, 1);
+                            else classes.push(value);
+                        }),
+                        contains: function(value) {
+                            return !!~self.className.split(/\s+/).indexOf(value);
+                        }
+                    };
                 }
             });
-            
-            function createBubbleTrail() {
-                // Number of bubbles based on mouse velocity
-                const bubbleCount = Math.min(Math.floor(mouseVelocity / 10), 5);
-                
-                for (let i = 0; i < bubbleCount; i++) {
-                    // Create bubble
-                    const bubble = document.createElement('div');
-                    bubble.className = 'bubble';
-                    
-                    // Random size between 5-20px
-                    const size = Math.random() * 15 + 5;
-                    bubble.style.width = `${size}px`;
-                    bubble.style.height = `${size}px`;
-                    
-                    // Random position around cursor
-                    const offsetX = (Math.random() - 0.5) * 40;
-                    const offsetY = (Math.random() - 0.5) * 40;
-                    
-                    bubble.style.left = `${mouseX + offsetX}px`;
-                    bubble.style.top = `${mouseY + offsetY}px`;
-                    
-                    // Random color variation
-                    const hue = 200 + Math.random() * 60; // Blue-ish range
-                    const saturation = 70 + Math.random() * 30;
-                    const lightness = 60 + Math.random() * 20;
-                    bubble.style.backgroundColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-                    
-                    // Random opacity
-                    const opacity = 0.3 + Math.random() * 0.4;
-                    bubble.style.opacity = opacity;
-                    
-                    // Add to container
-                    bubbleContainer.appendChild(bubble);
-                    
-                    // Animate bubble
-                    const animationDuration = 0.8 + Math.random() * 0.7;
-                    
-                    // Random movement
-                    const moveX = (Math.random() - 0.5) * 100;
-                    const moveY = (Math.random() - 0.5) * 100;
-                    
-                    bubble.animate([
-                        {
-                            transform: `translate(0, 0) scale(1)`,
-                            opacity: opacity
-                        },
-                        {
-                            transform: `translate(${moveX}px, ${moveY}px) scale(0.3)`,
-                            opacity: 0
-                        }
-                    ], {
-                        duration: animationDuration * 1000,
-                        easing: 'cubic-bezier(0.2, 0, 0.8, 1)'
-                    });
-                    
-                    // Remove bubble after animation
-                    setTimeout(() => {
-                        if (bubble.parentNode) {
-                            bubble.remove();
-                        }
-                    }, animationDuration * 1000);
-                }
-            }
-            
-            // Reduce bubble frequency on mobile/touch devices
-            if ('ontouchstart' in window || navigator.maxTouchPoints) {
-                // Still create some bubbles but less frequently
-                setInterval(() => {
-                    if (mouseVelocity > 1) {
-                        createBubbleTrail();
-                    }
-                }, 100);
-            }
-        });
+        }
     </script>
 </body>
 </html>
