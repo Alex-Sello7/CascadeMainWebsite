@@ -415,7 +415,7 @@ button, input, select, textarea {
 
 /* Print styles */
 @media print {
-  .navbar, .dark-mode-toggle, .scroll-down, .video-section, .cta-section {
+  .navbar, .dark-mode-toggle, .back-to-top, .scroll-down, .video-section, .cta-section {
     display: none !important;
   }
   
@@ -1616,11 +1616,11 @@ section {
   transform: scale(1.1);
 }
 
-/* ===== DARK MODE ===== */
+/* ===== DARK MODE TOGGLE ===== */
 .dark-mode-toggle {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 20px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -1641,6 +1641,83 @@ section {
   transform: rotate(360deg);
 }
 
+/* ===== BACK TO TOP BUTTON ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(44, 90, 160, 0.3);
+}
+
+/* Dark mode adjustments for buttons */
+.dark-mode .dark-mode-toggle,
+.dark-mode .back-to-top {
+  background: var(--card-bg);
+  color: var(--text-color);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .back-to-top {
+  background: linear-gradient(135deg, var(--accent-color), #4cc9f0);
+}
+
+/* Mobile adjustments for buttons */
+@media (max-width: 768px) {
+  .dark-mode-toggle,
+  .back-to-top {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .dark-mode-toggle {
+    bottom: 80px;
+    left: 15px;
+  }
+  
+  .back-to-top {
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dark-mode-toggle,
+  .back-to-top {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+
+/* ===== DARK MODE ===== */
 body.dark-mode {
   --bg-color: var(--bg-dark);
   --text-color: var(--text-dark);
@@ -1950,5 +2027,132 @@ select:focus {
     #bubble-container,
     .bubble {
         display: none;
+    }
+}
+
+/* ===== WORK IN PROGRESS POPUP ===== */
+.work-in-progress-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.work-in-progress-popup.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-content {
+    background: linear-gradient(135deg, var(--card-bg), #f8f9fa);
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+    transform: translateY(30px);
+    transition: transform 0.4s ease;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--card-border);
+}
+
+.work-in-progress-popup.active .popup-content {
+    transform: translateY(0);
+}
+
+.popup-icon {
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.popup-title {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.popup-message {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    opacity: 0.9;
+}
+
+.popup-close-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 12px 35px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 5px 15px rgba(44, 90, 160, 0.3);
+}
+
+.popup-close-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(44, 90, 160, 0.4);
+}
+
+.popup-close-btn:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Dark mode adjustments */
+.dark-mode .popup-content {
+    background: linear-gradient(135deg, var(--card-bg), #2a2a2a);
+}
+
+.dark-mode .popup-title {
+    color: var(--accent-color);
+}
+
+.dark-mode .popup-message {
+    color: var(--text-dark);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .popup-content {
+        padding: 30px 20px;
+    }
+    
+    .popup-icon {
+        font-size: 3rem;
+    }
+    
+    .popup-title {
+        font-size: 1.5rem;
+    }
+    
+    .popup-message {
+        font-size: 1rem;
     }
 }
