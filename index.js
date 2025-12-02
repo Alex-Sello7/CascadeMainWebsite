@@ -394,10 +394,12 @@ $(document).ready(function () {
       btnText.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
       submitBtn.disabled = true;
 
-      // Use a more compatible AJAX approach
+      // Use your Render backend URL
+      const backendUrl = 'https://cascade-backend-4v17.onrender.com/submit';
+      
       $.ajax({
           type: "POST",
-          url: "/submit", // Use relative URL instead of localhost
+          url: backendUrl,
           data: JSON.stringify(formData),
           contentType: "application/json",
           dataType: "text", // Expect text response
@@ -434,10 +436,16 @@ $(document).ready(function () {
                   errorMessage = "Request timed out. Please check your connection.";
               } else if (xhr.status === 0) {
                   errorMessage = "Cannot connect to server. Please check your internet connection.";
+              } else if (xhr.status === 404) {
+                  errorMessage = "Backend service not found. Please contact support.";
+              } else if (xhr.status === 500) {
+                  errorMessage = "Server error. Please try again later.";
+              } else if (xhr.status === 403) {
+                  errorMessage = "Access denied. CORS issue detected.";
               }
               
               showErrorAlert(errorMessage);
-              console.error("AJAX Error:", status, error);
+              console.error("AJAX Error:", status, error, xhr.status);
               
               btnText.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Submit';
               submitBtn.disabled = false;
