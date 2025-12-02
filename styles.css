@@ -1697,13 +1697,15 @@ section {
     font-size: 1.1rem;
   }
   
+  /* FIXED: Properly spaced on mobile - dark mode toggle at bottom-left */
   .dark-mode-toggle {
-    bottom: 80px;
+    bottom: 20px;
     left: 15px;
   }
   
+  /* FIXED: Back to top at bottom-right, properly spaced */
   .back-to-top {
-    bottom: 15px;
+    bottom: 20px;
     right: 15px;
   }
 }
@@ -1714,6 +1716,30 @@ section {
     width: 40px;
     height: 40px;
     font-size: 1rem;
+  }
+  
+  /* FIXED: Ensure they don't overlap on very small screens */
+  .dark-mode-toggle {
+    bottom: 15px;
+    left: 10px;
+  }
+  
+  .back-to-top {
+    bottom: 15px;
+    right: 10px;
+  }
+}
+
+/* FIXED: Add media query for screens between 480px and 600px where buttons might still touch */
+@media (max-width: 600px) and (min-width: 481px) {
+  .dark-mode-toggle {
+    bottom: 18px;
+    left: 12px;
+  }
+  
+  .back-to-top {
+    bottom: 18px;
+    right: 12px;
   }
 }
 
