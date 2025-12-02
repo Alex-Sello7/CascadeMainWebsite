@@ -23,25 +23,6 @@ $(document).ready(function () {
   // Method 2: Fallback - hide loader after 3 seconds max (if page takes too long)
   setTimeout(hideLoader, 3000);
   
-  // Method 3: If all critical elements are loaded, hide loader sooner
-  const criticalElementsLoaded = () => {
-      const heroSection = document.querySelector('.hero-section');
-      const navbar = document.querySelector('.navbar');
-      
-      if (heroSection && navbar) {
-          // Check if hero background image is loaded
-          const heroBg = getComputedStyle(heroSection).backgroundImage;
-          const img = new Image();
-          img.src = heroBg.replace(/url\(["']?(.*?)["']?\)/i, '$1');
-          
-          img.onload = hideLoader;
-          img.onerror = hideLoader; // Fallback if image fails
-      }
-  };
-  
-  // Check for critical elements after a short delay
-  setTimeout(criticalElementsLoaded, 1000);
-  
   // Also hide loader if user starts interacting
   $(document).on('click', function earlyHideLoader() {
       hideLoader();
@@ -362,9 +343,10 @@ $(document).ready(function () {
       }
   }
 
-  // Form submission handling with better error handling
+  // FORM SUBMISSION HANDLING - UPDATED FOR NEW BACKEND
   $('#contactForm').on('submit', function (e) {
       e.preventDefault();
+      console.log('Form submitted');
 
       // Basic form validation
       let isValid = true;
@@ -377,35 +359,49 @@ $(document).ready(function () {
           }
       });
 
+      // Email validation
+      const email = $('#email').val().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !emailRegex.test(email)) {
+          $('#email').addClass('is-invalid');
+          showErrorAlert("Please enter a valid email address.");
+          return;
+      }
+
       if (!isValid) {
           showErrorAlert("Please fill in all required fields.");
           return;
       }
 
       const formData = {
-          name: $('#name').val(),
-          email: $('#email').val(),
-          service: $('#service').val(),
-          project: $('#project').val()
+          name: $('#name').val().trim(),
+          email: email,
+          service: $('#service').val().trim(),
+          project: $('#project').val().trim()
       };
+
+      console.log('Form data prepared:', formData);
 
       const submitBtn = document.getElementById('submitBtn');
       const btnText = submitBtn.querySelector('.btn-text');
       btnText.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
       submitBtn.disabled = true;
 
-      // Use your Render backend URL
+      // Use your Render backend URL - make sure this is correct
       const backendUrl = 'https://cascade-backend-4v17.onrender.com/submit';
+      console.log('Sending to backend:', backendUrl);
       
       $.ajax({
           type: "POST",
           url: backendUrl,
           data: JSON.stringify(formData),
           contentType: "application/json",
-          dataType: "text", // Expect text response
-          timeout: 10000, // 10 second timeout
+          dataType: "json", // Expect JSON response from new backend
+          timeout: 15000, // 15 second timeout
           success: function (response) {
-              if (response.trim() === "success") {
+              console.log('Backend response:', response);
+              
+              if (response.success === true || response.message === "success") {
                   btnText.innerHTML = '<i class="fas fa-check"></i> Message Sent!';
                   submitBtn.classList.add('btn-success');
                   
@@ -419,10 +415,17 @@ $(document).ready(function () {
                   
                   // Reset form
                   $('#contactForm')[0].reset();
+                  
+                  // Scroll to show the success message
+                  $('html, body').animate({
+                      scrollTop: $('#contact').offset().top - 100
+                  }, 500);
               } else {
-                  showErrorAlert("Error: " + response);
+                  const errorMsg = response.error || "Unknown error occurred";
+                  showErrorAlert("Error: " + errorMsg);
               }
 
+              // Reset button after 3 seconds
               setTimeout(function () {
                   btnText.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Submit';
                   submitBtn.disabled = false;
@@ -430,25 +433,49 @@ $(document).ready(function () {
               }, 3000);
           },
           error: function (xhr, status, error) {
+              console.error('AJAX Error:', {
+                  status: status,
+                  error: error,
+                  xhrStatus: xhr.status,
+                  xhrStatusText: xhr.statusText,
+                  responseText: xhr.responseText
+              });
+              
               let errorMessage = "Error submitting form. Please try again or contact us directly.";
               
               if (status === "timeout") {
-                  errorMessage = "Request timed out. Please check your connection.";
+                  errorMessage = "Request timed out. Please check your connection and try again.";
               } else if (xhr.status === 0) {
                   errorMessage = "Cannot connect to server. Please check your internet connection.";
               } else if (xhr.status === 404) {
-                  errorMessage = "Backend service not found. Please contact support.";
+                  errorMessage = "Backend service not found. The server URL might be incorrect.";
               } else if (xhr.status === 500) {
-                  errorMessage = "Server error. Please try again later.";
+                  // Try to parse the server error message
+                  try {
+                      const serverError = JSON.parse(xhr.responseText);
+                      errorMessage = serverError.error || "Server error. Please try again later.";
+                  } catch (e) {
+                      errorMessage = "Server error. Please try again later.";
+                  }
+              } else if (xhr.status === 400) {
+                  try {
+                      const serverError = JSON.parse(xhr.responseText);
+                      errorMessage = serverError.error || "Please check your form data.";
+                  } catch (e) {
+                      errorMessage = "Invalid form data. Please check all fields.";
+                  }
               } else if (xhr.status === 403) {
-                  errorMessage = "Access denied. CORS issue detected.";
+                  errorMessage = "Access denied. Please contact support.";
               }
               
               showErrorAlert(errorMessage);
-              console.error("AJAX Error:", status, error, xhr.status);
               
+              // Reset button immediately
               btnText.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Submit';
               submitBtn.disabled = false;
+          },
+          complete: function() {
+              console.log('AJAX request completed');
           }
       });
   });
@@ -463,6 +490,11 @@ $(document).ready(function () {
           '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
           '</div>'
       );
+      
+      // Scroll to show the error
+      $('html, body').animate({
+          scrollTop: $('#contact').offset().top - 100
+      }, 500);
   }
 
   // Set current year in footer
@@ -509,6 +541,26 @@ $(document).ready(function () {
           imageObserver.observe(this);
       });
   }
+
+  // Test backend connection on page load
+  function testBackendConnection() {
+      console.log('Testing backend connection...');
+      $.ajax({
+          url: 'https://cascade-backend-4v17.onrender.com/',
+          type: 'GET',
+          timeout: 5000,
+          success: function(response) {
+              console.log('Backend is reachable:', response);
+          },
+          error: function(xhr, status, error) {
+              console.warn('Backend connection test failed:', status, error);
+              console.log('Form submissions may not work until backend is running.');
+          }
+      });
+  }
+
+  // Test connection after a short delay
+  setTimeout(testBackendConnection, 2000);
 });
 
 // Add this outside the jQuery ready function for better compatibility
@@ -516,7 +568,13 @@ $(document).ready(function () {
     // Feature detection
     if (!window.jQuery) {
         console.error("jQuery failed to load!");
-        // You could load a fallback here if needed
+        // Fallback: show a message to users
+        setTimeout(function() {
+            const loader = document.querySelector('.loader');
+            if (loader) {
+                loader.innerHTML = '<div style="text-align: center; padding: 50px; color: white;"><h3>Website Loading Issue</h3><p>Please refresh the page or check your internet connection.</p><button onclick="window.location.reload()">Refresh Page</button></div>';
+            }
+        }, 5000);
     }
     
     // Check for console to prevent errors in older IE
@@ -524,7 +582,8 @@ $(document).ready(function () {
         window.console = {
             log: function() {},
             error: function() {},
-            warn: function() {}
+            warn: function() {},
+            info: function() {}
         };
     }
 })();
