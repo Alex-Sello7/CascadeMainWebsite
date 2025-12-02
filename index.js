@@ -516,6 +516,105 @@ $(document).ready(function () {
           imageObserver.observe(this);
       });
   }
+
+  // ===== BUBBLE TRAILS CURSOR EFFECT =====
+  function createBubbleTrails() {
+      const bubbleContainer = document.createElement('div');
+      bubbleContainer.id = 'bubble-container';
+      document.body.appendChild(bubbleContainer);
+
+      let mouseX = 0;
+      let mouseY = 0;
+      let bubbles = [];
+      let bubbleCount = 15; // Number of bubbles in trail
+      
+      // Track mouse position
+      document.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+      });
+      
+      // Create bubbles
+      function createBubble(x, y) {
+          const bubble = document.createElement('div');
+          bubble.className = 'bubble';
+          
+          // Random size between 4px and 10px
+          const size = Math.random() * 6 + 4;
+          
+          // Random movement direction
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.random() * 30 + 20;
+          const moveX = Math.cos(angle) * distance;
+          const moveY = Math.sin(angle) * distance;
+          
+          // Set initial position and size
+          bubble.style.width = `${size}px`;
+          bubble.style.height = `${size}px`;
+          bubble.style.left = `${x - size/2}px`;
+          bubble.style.top = `${y - size/2}px`;
+          
+          // Set animation properties
+          bubble.style.setProperty('--move-x', `${moveX}px`);
+          bubble.style.setProperty('--move-y', `${moveY}px`);
+          
+          // Random color variation
+          const hue = 210 + Math.random() * 30; // Blue hue range
+          const opacity = Math.random() * 0.4 + 0.3;
+          bubble.style.background = `radial-gradient(circle at 30% 30%, hsla(${hue}, 80%, 70%, ${opacity}), hsla(${hue}, 80%, 50%, ${opacity * 0.7}))`;
+          
+          bubbleContainer.appendChild(bubble);
+          bubbles.push(bubble);
+          
+          // Remove bubble after animation completes
+          setTimeout(() => {
+              if (bubble.parentNode) {
+                  bubble.remove();
+                  bubbles = bubbles.filter(b => b !== bubble);
+              }
+          }, 800); // Match CSS animation duration
+      }
+      
+      // Animation loop
+      let animationId;
+      let lastTime = 0;
+      const interval = 50; // Create bubble every 50ms
+      
+      function animate(currentTime) {
+          if (!lastTime) lastTime = currentTime;
+          
+          if (currentTime - lastTime >= interval) {
+              createBubble(mouseX, mouseY);
+              lastTime = currentTime;
+          }
+          
+          // Limit total number of bubbles
+          if (bubbles.length > bubbleCount) {
+              const bubbleToRemove = bubbles.shift();
+              if (bubbleToRemove && bubbleToRemove.parentNode) {
+                  bubbleToRemove.remove();
+              }
+          }
+          
+          animationId = requestAnimationFrame(animate);
+      }
+      
+      // Start animation
+      animationId = requestAnimationFrame(animate);
+      
+      // Cleanup on page unload
+      $(window).on('unload', function() {
+          if (animationId) {
+              cancelAnimationFrame(animationId);
+          }
+      });
+  }
+
+  // Initialize bubble trails after page loads
+  $(window).on('load', function() {
+      // Delay slightly to ensure page is loaded
+      setTimeout(createBubbleTrails, 500);
+  });
 });
 
 // Add this outside the jQuery ready function for better compatibility
