@@ -480,24 +480,27 @@
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <div class="contact-form" data-aos="fade-up" data-aos-delay="300">
+                        <!-- Formspree Form (Requires setup at https://formspree.io/) -->
                         <form id="contactForm" novalidate>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="name" class="form-label">Full Name</label>
-                                        <input type="text" class="form-control" id="name" required>
+                                        <label for="name" class="form-label">Full Name *</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                        <div class="invalid-feedback">Please enter your name.</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" required>
+                                        <label for="email" class="form-label">Email Address *</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                        <div class="invalid-feedback">Please enter a valid email address.</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="service" class="form-label">Service Interested In</label>
-                                <select class="form-control" id="service" required>
+                                <label for="service" class="form-label">Service Interested In *</label>
+                                <select class="form-control" id="service" name="service" required>
                                     <option value="">Select a service</option>
                                     <option value="Basic Website">Basic Website</option>
                                     <option value="Business Package">Business Package</option>
@@ -505,15 +508,23 @@
                                     <option value="Consultation">Consultation</option>
                                     <option value="Other">Other</option>
                                 </select>
+                                <div class="invalid-feedback">Please select a service.</div>
                             </div>
                             <div class="mb-4">
-                                <label for="project" class="form-label">Project Details</label>
-                                <textarea class="form-control" id="project" rows="4" required></textarea>
+                                <label for="project" class="form-label">Project Details *</label>
+                                <textarea class="form-control" id="project" name="project" rows="4" required
+                                    placeholder="Tell us about your project..."></textarea>
+                                <div class="invalid-feedback">Please provide project details.</div>
                             </div>
+                            <!-- Hidden fields for Formspree -->
+                            <input type="hidden" name="_subject" value="New Cascade Creations Inquiry">
+                            <input type="hidden" name="_replyto" value="" id="email-field">
+                            <input type="text" name="_gotcha" style="display:none">
+
                             <div class="text-center">
                                 <button type="submit" class="btn btn-submit" id="submitBtn">
                                     <span class="btn-text"><i class="fas fa-paper-plane me-2" aria-hidden="true"></i>
-                                        Submit</span>
+                                        Send Message</span>
                                 </button>
                             </div>
                         </form>
@@ -525,14 +536,14 @@
                             <div class="contact-info-box">
                                 <i class="fas fa-phone fa-2x mb-3" aria-hidden="true"></i>
                                 <h4>Phone</h4>
-                                <p>072 078 6569</p>
+                                <p><a href="tel:0720786569">072 078 6569</a></p>
                             </div>
                         </div>
                         <div class="col-md-6 text-center mb-4">
                             <div class="contact-info-box">
                                 <i class="fas fa-envelope fa-2x mb-3" aria-hidden="true"></i>
                                 <h4>Email</h4>
-                                <p>atsello4@gmail.com</p>
+                                <p><a href="mailto:atsello4@gmail.com">atsello4@gmail.com</a></p>
                             </div>
                         </div>
                         <div class="col-12 text-center mt-2">
@@ -625,11 +636,12 @@
             <div class="popup-icon">
                 <i class="fas fa-code"></i>
             </div>
-            <h3 class="popup-title">Work in Progress</h3>
+            <h3 class="popup-title">Direct Contact</h3>
             <p class="popup-message">
-                Our development team is currently working on the backend functionality.
-                For now, please email us directly at <strong>atsello4@gmail.com</strong>
-                or call <strong>072 078 6569</strong>. We appreciate your patience!
+                You can contact us directly via:<br><br>
+                <strong>Email:</strong> <a href="mailto:atsello4@gmail.com">atsello4@gmail.com</a><br>
+                <strong>Phone:</strong> <a href="tel:0720786569">072 078 6569</a><br><br>
+                We typically respond within 24 hours!
             </p>
             <button class="popup-close-btn" aria-label="Close popup">
                 Got it!

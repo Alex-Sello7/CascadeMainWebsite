@@ -371,7 +371,7 @@ $(document).ready(function () {
       }
   }
 
-  // ===== FORM SUBMISSION HANDLING WITH PHP BACKEND =====
+  // ===== FORM SUBMISSION HANDLING =====
   $('#contactForm').on('submit', function (e) {
       e.preventDefault();
 
@@ -391,13 +391,14 @@ $(document).ready(function () {
           return;
       }
 
-      // Get form data
-      const formData = {
-          name: $('#name').val().trim(),
-          email: $('#email').val().trim(),
-          service: $('#service').val(),
-          project: $('#project').val().trim()
-      };
+      // Email validation
+      const email = $('#email').val().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+          $('#email').addClass('is-invalid');
+          showErrorAlert("Please enter a valid email address.");
+          return;
+      }
 
       // Show loading state
       const submitBtn = $('#submitBtn');
@@ -405,56 +406,42 @@ $(document).ready(function () {
       submitBtn.find('.btn-text').html('<i class="fas fa-spinner fa-spin me-2"></i> Sending...');
       submitBtn.prop('disabled', true);
 
-      // Send to PHP backend
+      // Get form data
+      const formData = {
+          name: $('#name').val().trim(),
+          email: email,
+          service: $('#service').val(),
+          project: $('#project').val().trim()
+      };
+
+      
+      // Then replace 'YOUR_FORMSPREE_FORM_ID' with your actual form ID
+      const formspreeUrl = 'https://formspree.io/f/xjknerpq';
+      
+      // Method 2: Email client fallback
+      const subject = `Cascade Creations Inquiry: ${formData.service}`;
+      const body = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0AService: ${formData.service}%0D%0A%0D%0AProject Details:%0D%0A${formData.project}`;
+      
+      // Try Formspree first, fall back to email client
       $.ajax({
-          url: 'process-contact.php', // Your PHP file
-          type: 'POST',
-          data: JSON.stringify(formData),
-          contentType: 'application/json',
+          url: formspreeUrl,
+          method: 'POST',
+          data: formData,
           dataType: 'json',
           success: function(response) {
-              if (response.success) {
-                  // Show success message
-                  showSuccessAlert(response.message || "Thank you! Your message has been sent successfully.");
-                  
-                  // Reset form
-                  $('#contactForm')[0].reset();
-                  
-                  // Remove any validation classes
-                  $('#contactForm').find('.is-invalid').removeClass('is-invalid');
-              } else {
-                  // Show error
-                  showErrorAlert(response.error || "Failed to send message. Please try again.");
-                  
-                  // If there's a suggestion, log it
-                  if (response.suggestion) {
-                      console.log('Suggestion:', response.suggestion);
-                  }
-              }
+              showSuccessAlert("Thank you! Your message has been sent successfully. We'll get back to you soon.");
+              $('#contactForm')[0].reset();
           },
           error: function(xhr, status, error) {
-              console.error('AJAX Error:', status, error);
+              // Formspree failed, fall back to email client
+              console.log('Formspree failed, falling back to email client');
               
-              // Try to parse response if available
-              if (xhr.responseText) {
-                  try {
-                      const errorResponse = JSON.parse(xhr.responseText);
-                      showErrorAlert(errorResponse.error || "Server error occurred. Please try again.");
-                      
-                      // Show suggestion if available
-                      if (errorResponse.suggestion) {
-                          setTimeout(() => {
-                              showErrorAlert(errorResponse.suggestion);
-                          }, 1000);
-                      }
-                  } catch (e) {
-                      // If can't parse JSON, show helpful error
-                      showErrorAlert("Unable to process your request. Please email us directly at atsello4@gmail.com");
-                  }
-              } else {
-                  // Network error
-                  showErrorAlert("Network error. Please check your connection and try again.");
-              }
+              // Open email client with pre-filled data
+              window.location.href = `mailto:atsello4@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+              
+              showSuccessAlert("Email client opened. Please send the pre-filled email to contact us. We'll respond within 24 hours.");
+              
+              $('#contactForm')[0].reset();
           },
           complete: function() {
               // Reset button state
@@ -703,7 +690,6 @@ $(document).ready(function () {
       
       if (email && !emailRegex.test(email)) {
           $(this).addClass('is-invalid');
-          showErrorAlert("Please enter a valid email address.");
       }
   });
 
