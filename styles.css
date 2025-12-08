@@ -2240,3 +2240,37 @@ select:focus {
         display: none;
     }
 }
+
+/*Extras*/
+
+/* Prevent zooming on input focus in iOS */
+@media screen and (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom */
+  }
+}
+
+/* Prevent text size adjustment */
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Additional fix for social media in-app browsers */
+body {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling in iOS */
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: -webkit-fill-available; /* iOS fix */
+}
+
+/* Prevent pull-to-refresh in some browsers */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+}

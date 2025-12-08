@@ -1,4 +1,37 @@
 $(document).ready(function () {
+  // ===== SOCIAL MEDIA BROWSER DETECTION & VIEWPORT FIX =====
+  function isSocialMediaBrowser() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    
+    // Check for social media apps
+    const isFacebook = /FBAN|FBAV/i.test(userAgent);
+    const isTwitter = /Twitter/i.test(userAgent);
+    const isInstagram = /Instagram/i.test(userAgent);
+    const isLinkedIn = /LinkedIn/i.test(userAgent);
+    
+    return isFacebook || isTwitter || isInstagram || isLinkedIn;
+  }
+
+  // Apply fixes for social media browsers
+  if (isSocialMediaBrowser()) {
+    // Force viewport recalculation
+    document.addEventListener('DOMContentLoaded', function() {
+      const viewport = document.querySelector("meta[name=viewport]");
+      if (viewport) {
+        viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+      }
+      
+      // Prevent resize on focus
+      document.addEventListener('focusin', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+          setTimeout(function() {
+            window.scrollTo(0, 0);
+          }, 100);
+        }
+      });
+    });
+  }
+
   // ===== LOADER FUNCTIONALITY =====
   const loader = document.querySelector('.loader');
   
@@ -738,6 +771,46 @@ $(document).ready(function () {
             warn: function() {}
         };
     }
+
+    // Fix for mobile viewport issues - Enhanced version
+    function setViewport() {
+        var viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // For mobile devices, use a more restrictive viewport
+                viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no";
+            }
+        }
+    }
+    
+    // Run on page load and resize
+    window.addEventListener('load', setViewport);
+    window.addEventListener('resize', setViewport);
+    setViewport(); // Initial call
+    
+    // Prevent zooming on input focus in iOS
+    document.addEventListener('DOMContentLoaded', function() {
+        var viewport = document.querySelector('meta[name="viewport"]');
+        var inputs = document.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(function(input) {
+            input.addEventListener('focus', function() {
+                if (viewport) {
+                    viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                setTimeout(function() {
+                    if (viewport) {
+                        viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover";
+                    }
+                }, 500);
+            });
+        });
+    });
 })();
 
 // Additional utility functions
