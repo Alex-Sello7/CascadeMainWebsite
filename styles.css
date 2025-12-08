@@ -208,10 +208,6 @@
     background: linear-gradient(135deg, #0a192f, #112240);
 }
 
-.dark-mode .loader-content {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
