@@ -358,28 +358,6 @@ $(document).ready(function () {
       });
   }
 
-  // Enhanced service selection functionality with smooth scroll
-  $('.pricing-card .btn-primary').on('click', function (e) {
-      e.preventDefault();
-
-      // Get the service name from the pricing card
-      const serviceName = $(this).closest('.pricing-card').find('h4').text().trim();
-
-      // Set the service value in the contact form
-      $('#service').val(serviceName);
-
-      // Smooth scroll to the contact section
-      $('html, body').animate({
-          scrollTop: $('#contact').offset().top - 70
-      }, 800, 'swing', function() {
-          // After scrolling is complete, focus on the service field
-          $('#service').addClass('highlight-field');
-          setTimeout(function () {
-              $('#service').removeClass('highlight-field');
-          }, 2000);
-      });
-  });
-
   // Handle direct URL hash navigation
   if (window.location.hash) {
       const target = $(window.location.hash);
@@ -393,7 +371,7 @@ $(document).ready(function () {
       }
   }
 
-  // ===== FORM SUBMISSION HANDLING WITH WORK IN PROGRESS POPUP =====
+  // ===== FORM SUBMISSION HANDLING WITH PHP BACKEND =====
   $('#contactForm').on('submit', function (e) {
       e.preventDefault();
 
@@ -413,14 +391,119 @@ $(document).ready(function () {
           return;
       }
 
-      // Show work in progress popup
-      showWorkInProgressPopup();
+      // Get form data
+      const formData = {
+          name: $('#name').val().trim(),
+          email: $('#email').val().trim(),
+          service: $('#service').val(),
+          project: $('#project').val().trim()
+      };
 
-      // Optional: Reset form after a short delay
-      setTimeout(() => {
-          $('#contactForm')[0].reset();
-      }, 500);
+      // Show loading state
+      const submitBtn = $('#submitBtn');
+      const originalText = submitBtn.find('.btn-text').html();
+      submitBtn.find('.btn-text').html('<i class="fas fa-spinner fa-spin me-2"></i> Sending...');
+      submitBtn.prop('disabled', true);
+
+      // Send to PHP backend
+      $.ajax({
+          url: 'process-contact.php', // Your PHP file
+          type: 'POST',
+          data: JSON.stringify(formData),
+          contentType: 'application/json',
+          dataType: 'json',
+          success: function(response) {
+              if (response.success) {
+                  // Show success message
+                  showSuccessAlert(response.message || "Thank you! Your message has been sent successfully.");
+                  
+                  // Reset form
+                  $('#contactForm')[0].reset();
+                  
+                  // Remove any validation classes
+                  $('#contactForm').find('.is-invalid').removeClass('is-invalid');
+              } else {
+                  // Show error
+                  showErrorAlert(response.error || "Failed to send message. Please try again.");
+                  
+                  // If there's a suggestion, log it
+                  if (response.suggestion) {
+                      console.log('Suggestion:', response.suggestion);
+                  }
+              }
+          },
+          error: function(xhr, status, error) {
+              console.error('AJAX Error:', status, error);
+              
+              // Try to parse response if available
+              if (xhr.responseText) {
+                  try {
+                      const errorResponse = JSON.parse(xhr.responseText);
+                      showErrorAlert(errorResponse.error || "Server error occurred. Please try again.");
+                      
+                      // Show suggestion if available
+                      if (errorResponse.suggestion) {
+                          setTimeout(() => {
+                              showErrorAlert(errorResponse.suggestion);
+                          }, 1000);
+                      }
+                  } catch (e) {
+                      // If can't parse JSON, show helpful error
+                      showErrorAlert("Unable to process your request. Please email us directly at atsello4@gmail.com");
+                  }
+              } else {
+                  // Network error
+                  showErrorAlert("Network error. Please check your connection and try again.");
+              }
+          },
+          complete: function() {
+              // Reset button state
+              submitBtn.find('.btn-text').html(originalText);
+              submitBtn.prop('disabled', false);
+          }
+      });
   });
+
+  // ===== ALERT FUNCTIONS =====
+  function showSuccessAlert(message) {
+      // Remove any existing alerts
+      $('.alert').remove();
+      
+      // Add success alert
+      $('#contactForm').prepend(
+          '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+          '<strong>Success!</strong> ' + message +
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+          '</div>'
+      );
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+          $('.alert').alert('close');
+      }, 5000);
+      
+      // Scroll to alert
+      $('html, body').animate({
+          scrollTop: $('#contact').offset().top - 100
+      }, 500);
+  }
+
+  function showErrorAlert(message) {
+      // Remove any existing alerts
+      $('.alert').remove();
+      
+      $('#contactForm').prepend(
+          '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+          '<strong>Error!</strong> ' + message +
+          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+          '</div>'
+      );
+      
+      // Scroll to alert
+      $('html, body').animate({
+          scrollTop: $('#contact').offset().top - 100
+      }, 500);
+  }
 
   // ===== WORK IN PROGRESS POPUP FUNCTIONALITY =====
   function showWorkInProgressPopup() {
@@ -459,18 +542,6 @@ $(document).ready(function () {
           }
       }
   });
-
-  function showErrorAlert(message) {
-      // Remove any existing alerts
-      $('.alert').remove();
-      
-      $('#contactForm').prepend(
-          '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-          '<strong>Error!</strong> ' + message +
-          '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
-          '</div>'
-      );
-  }
 
   // Set current year in footer
   $('#current-year').text(new Date().getFullYear());
@@ -615,6 +686,54 @@ $(document).ready(function () {
       // Delay slightly to ensure page is loaded
       setTimeout(createBubbleTrails, 500);
   });
+
+  // ===== ADDITIONAL FORM ENHANCEMENTS =====
+  
+  // Real-time form validation
+  $('#name, #email, #service, #project').on('input', function() {
+      if ($(this).val().trim()) {
+          $(this).removeClass('is-invalid');
+      }
+  });
+
+  // Validate email on blur
+  $('#email').on('blur', function() {
+      const email = $(this).val().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (email && !emailRegex.test(email)) {
+          $(this).addClass('is-invalid');
+          showErrorAlert("Please enter a valid email address.");
+      }
+  });
+
+  // Auto-expand textarea as user types
+  $('#project').on('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+  });
+
+  // Form field focus effects
+  $('.form-control').on('focus', function() {
+      $(this).closest('.mb-3').addClass('focused');
+  }).on('blur', function() {
+      $(this).closest('.mb-3').removeClass('focused');
+  });
+
+  // Add CSS for focused state
+  if (!$('#form-styles').length) {
+      $('head').append(`
+          <style id="form-styles">
+              .mb-3.focused .form-label {
+                  color: var(--primary-color);
+                  font-weight: 600;
+              }
+              .mb-3.focused .form-control {
+                  border-color: var(--primary-color);
+              }
+          </style>
+      `);
+  }
 });
 
 // Add this outside the jQuery ready function for better compatibility
@@ -634,3 +753,31 @@ $(document).ready(function () {
         };
     }
 })();
+
+// Additional utility functions
+function formatPhoneNumber(phoneNumber) {
+    // Format phone number for display
+    if (!phoneNumber) return '';
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+        return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return phoneNumber;
+}
+
+function debounce(func, wait, immediate) {
+    // Debounce function for performance
+    let timeout;
+    return function() {
+        const context = this, args = arguments;
+        const later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
+}
