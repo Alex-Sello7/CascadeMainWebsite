@@ -238,7 +238,7 @@ $(document).ready(function () {
   });
 
   // Enhanced smooth scrolling for nav links
-  $('a.nav-link, .btn-primary, .btn-outline, .cta-btn').on('click', function (event) {
+  $('a.nav-link, .btn-primary, .btn-outline, .cta-btn, .cta-secondary-btn').on('click', function (event) {
       if (this.hash !== '' && $(this).attr('data-bs-toggle') !== 'dropdown') {
           event.preventDefault();
           const hash = this.hash;
@@ -448,7 +448,7 @@ $(document).ready(function () {
       };
 
       
-      // Then replace 'YOUR_FORMSPREE_FORM_ID' with your actual form ID
+      
       const formspreeUrl = 'https://formspree.io/f/xjknerpq';
       
       // Method 2: Email client fallback
@@ -753,6 +753,348 @@ $(document).ready(function () {
           </style>
       `);
   }
+
+  // ===== ANIMATED COUNTERS FOR STATS SECTION =====
+  function animateCounters() {
+      const counters = document.querySelectorAll('.stat-number');
+      
+      counters.forEach(counter => {
+          const target = parseInt(counter.getAttribute('data-count'));
+          const duration = 2000; // 2 seconds
+          const increment = target / (duration / 16); // 60fps
+          
+          let current = 0;
+          const timer = setInterval(() => {
+              current += increment;
+              if (current >= target) {
+                  current = target;
+                  clearInterval(timer);
+              }
+              counter.textContent = Math.floor(current);
+          }, 16);
+      });
+  }
+
+  // Trigger counters when they come into view
+  const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+          if (entry.isIntersecting) {
+              animateCounters();
+              statsObserver.unobserve(entry.target);
+          }
+      });
+  }, { threshold: 0.5 });
+
+  // Observe stats section
+  const statsSection = document.getElementById('stats');
+  if (statsSection) {
+      statsObserver.observe(statsSection);
+  }
+
+  // ===== SKILL BAR ANIMATIONS =====
+  function animateSkillBars() {
+      const skillBars = document.querySelectorAll('.skill-level');
+      
+      skillBars.forEach(bar => {
+          const width = bar.style.width;
+          bar.style.width = '0';
+          
+          setTimeout(() => {
+              bar.style.transition = 'width 1.5s ease-in-out';
+              bar.style.width = width;
+          }, 300);
+      });
+  }
+
+  // Trigger skill bar animations when team section comes into view
+  const teamObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+          if (entry.isIntersecting) {
+              animateSkillBars();
+              teamObserver.unobserve(entry.target);
+          }
+      });
+  }, { threshold: 0.3 });
+
+  // Observe team section
+  const teamSection = document.getElementById('team');
+  if (teamSection) {
+      teamObserver.observe(teamSection);
+  }
+
+  // ===== TESTIMONIAL AUTO-SLIDER =====
+  function initTestimonialSlider() {
+      const testimonials = $('.testimonial-card');
+      let currentIndex = 0;
+      
+      if (testimonials.length > 1) {
+          // Auto-rotate testimonials every 5 seconds
+          setInterval(() => {
+              testimonials.removeClass('active');
+              currentIndex = (currentIndex + 1) % testimonials.length;
+              $(testimonials[currentIndex]).addClass('active');
+          }, 5000);
+      }
+  }
+
+  // Initialize testimonial slider after page loads
+  $(window).on('load', function() {
+      setTimeout(initTestimonialSlider, 1000);
+  });
+
+  // ===== TECHNOLOGY STACK HOVER EFFECTS =====
+  function initTechStackEffects() {
+      const techItems = $('.tech-item');
+      
+      techItems.each(function(index) {
+          $(this).css('transition-delay', `${index * 0.1}s`);
+      });
+      
+      // Add ripple effect on click
+      techItems.on('click', function() {
+          const $this = $(this);
+          $this.addClass('ripple');
+          setTimeout(() => {
+              $this.removeClass('ripple');
+          }, 600);
+      });
+  }
+
+  // Initialize tech stack effects
+  initTechStackEffects();
+
+  // Add CSS for ripple effect
+  if (!$('#ripple-effect').length) {
+      $('head').append(`
+          <style id="ripple-effect">
+              .tech-item.ripple {
+                  position: relative;
+                  overflow: hidden;
+              }
+              .tech-item.ripple::after {
+                  content: '';
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  width: 5px;
+                  height: 5px;
+                  background: rgba(66, 153, 225, 0.3);
+                  border-radius: 50%;
+                  transform: translate(-50%, -50%) scale(1);
+                  animation: ripple 0.6s ease-out;
+              }
+              @keyframes ripple {
+                  to {
+                      transform: translate(-50%, -50%) scale(40);
+                      opacity: 0;
+                  }
+              }
+          </style>
+      `);
+  }
+
+  // ===== TIMELINE ANIMATIONS =====
+  function initTimelineAnimations() {
+      const timelineItems = $('.timeline-item');
+      
+      // Add staggered animation delay
+      timelineItems.each(function(index) {
+          $(this).css('animation-delay', `${index * 0.2}s`);
+      });
+      
+      // Animate timeline line
+      const timelineLine = $('.timeline::before');
+      if (timelineLine.length) {
+          $(window).on('scroll', function() {
+              const scrollPos = $(window).scrollTop();
+              const timelineTop = $('#process-timeline').offset().top;
+              const timelineHeight = $('#process-timeline').height();
+              
+              if (scrollPos > timelineTop - 300 && scrollPos < timelineTop + timelineHeight - 300) {
+                  const progress = (scrollPos - timelineTop + 300) / timelineHeight;
+                  timelineLine.css('height', `${progress * 100}%`);
+              }
+          });
+      }
+  }
+
+  // Initialize timeline animations
+  initTimelineAnimations();
+
+  // ===== PARALLAX EFFECT FOR SECTIONS =====
+  function initParallaxEffects() {
+      const parallaxSections = $('.hero-section, .cta-section, .stats-section, .secondary-cta-section');
+      
+      $(window).on('scroll', function() {
+          const scrollPos = $(window).scrollTop();
+          
+          parallaxSections.each(function() {
+              const $section = $(this);
+              const speed = $section.data('parallax-speed') || 0.5;
+              const yPos = -(scrollPos * speed);
+              
+              if ($section.hasClass('hero-section') || $section.hasClass('cta-section') || $section.hasClass('secondary-cta-section')) {
+                  $section.css('background-position', `center ${yPos}px`);
+              }
+          });
+      });
+  }
+
+  // Initialize parallax effects
+  initParallaxEffects();
+
+  // ===== HOVER EFFECT FOR TEAM IMAGE =====
+  function initTeamImageEffect() {
+      const teamImage = $('.team-img');
+      const teamShape = $('.team-shape');
+      
+      if (teamImage.length && teamShape.length) {
+          teamImage.hover(
+              function() {
+                  teamShape.css({
+                      'transform': 'rotate(-8deg) translate(25px, 25px)',
+                      'transition': 'transform 0.4s ease'
+                  });
+              },
+              function() {
+                  teamShape.css({
+                      'transform': 'rotate(-5deg) translate(20px, 20px)',
+                      'transition': 'transform 0.4s ease'
+                  });
+              }
+          );
+      }
+  }
+
+  // Initialize team image effect
+  initTeamImageEffect();
+
+  // ===== SCROLL PROGRESS INDICATOR =====
+  function initScrollProgress() {
+      const progressBar = document.createElement('div');
+      progressBar.className = 'scroll-progress';
+      progressBar.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 0;
+          height: 4px;
+          background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+          z-index: 1001;
+          transition: width 0.2s ease;
+      `;
+      document.body.appendChild(progressBar);
+      
+      $(window).on('scroll', function() {
+          const windowHeight = $(document).height() - $(window).height();
+          const scrollPosition = $(window).scrollTop();
+          const progress = (scrollPosition / windowHeight) * 100;
+          progressBar.style.width = `${progress}%`;
+      });
+  }
+
+  // Initialize scroll progress
+  initScrollProgress();
+
+  // ===== LAZY LOAD FOR ALL IMAGES =====
+  function lazyLoadAllImages() {
+      const images = document.querySelectorAll('img:not([data-src])');
+      
+      images.forEach(img => {
+          if (!img.hasAttribute('data-src')) {
+              img.setAttribute('data-src', img.src);
+              img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMSAxIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+';
+          }
+      });
+      
+      // Use existing IntersectionObserver or create new one
+      if ('IntersectionObserver' in window) {
+          const lazyImageObserver = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                  if (entry.isIntersecting) {
+                      const img = entry.target;
+                      if (img.dataset.src) {
+                          img.src = img.dataset.src;
+                          img.removeAttribute('data-src');
+                      }
+                      lazyImageObserver.unobserve(img);
+                  }
+              });
+          });
+          
+          $('img[data-src]').each(function() {
+              lazyImageObserver.observe(this);
+          });
+      }
+  }
+
+  // Initialize lazy loading
+  lazyLoadAllImages();
+
+  // ===== SMOOTH SCROLL FOR SCROLL-DOWN BUTTON =====
+  $('.scroll-down').on('click', function() {
+      $('html, body').animate({
+          scrollTop: $('#about').offset().top - 70
+      }, 800);
+  });
+
+  // ===== ADD VISUAL FEEDBACK FOR INTERACTIVE ELEMENTS =====
+  function addVisualFeedback() {
+      // Add hover effect to all interactive cards
+      $('.process-card, .portfolio-card, .service-package-card, .testimonial-card, .tech-stack-card').each(function() {
+          $(this).on('mouseenter', function() {
+              $(this).css('transform', 'translateY(-10px)');
+          }).on('mouseleave', function() {
+              $(this).css('transform', 'translateY(0)');
+          });
+      });
+      
+      // Add pulse animation to CTA buttons
+      setInterval(() => {
+          $('.cta-btn, .cta-secondary-btn').addClass('pulse');
+          setTimeout(() => {
+              $('.cta-btn, .cta-secondary-btn').removeClass('pulse');
+          }, 1000);
+      }, 5000);
+  }
+
+  // Initialize visual feedback
+  addVisualFeedback();
+
+  // Add CSS for pulse animation
+  if (!$('#pulse-animation').length) {
+      $('head').append(`
+          <style id="pulse-animation">
+              @keyframes pulse {
+                  0% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+                  50% { box-shadow: 0 5px 25px rgba(230, 126, 34, 0.6); }
+                  100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
+              }
+              .cta-btn.pulse, .cta-secondary-btn.pulse {
+                  animation: pulse 1s ease-in-out;
+              }
+          </style>
+      `);
+  }
+
+  // ===== PAGE LOAD COMPLETE ANIMATIONS =====
+  function pageLoadAnimations() {
+      
+      // Animate tech icons
+      $('.tech-icon').each(function(index) {
+          $(this).css({
+              'transform': 'scale(0) rotate(0deg)',
+              'transition': `transform 0.6s ease ${index * 0.1 + 1}s`
+          });
+          
+          setTimeout(() => {
+              $(this).css('transform', 'scale(1) rotate(360deg)');
+          }, 100 + (index * 100));
+      });
+  }
+
+  // Run page load animations after loader is hidden
+  setTimeout(pageLoadAnimations, 800);
 });
 
 // Add this outside the jQuery ready function for better compatibility
@@ -840,3 +1182,50 @@ function debounce(func, wait, immediate) {
         if (callNow) func.apply(context, args);
     };
 }
+
+// ===== PERFORMANCE OPTIMIZATIONS =====
+(function() {
+    // Request Animation Frame polyfill with performance optimization
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || 
+                                   window[vendors[x] + 'CancelRequestAnimationFrame'];
+    }
+
+    if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function(callback, element) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+
+    if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+})();
+
+// ===== BROWSER COMPATIBILITY CHECKS =====
+(function() {
+    // Check for modern browser features
+    const features = {
+        'IntersectionObserver': 'IntersectionObserver' in window,
+        'CSSVariables': 'CSS' in window && 'supports' in CSS && CSS.supports('--test', '0'),
+        'Flexbox': 'flex' in document.documentElement.style,
+        'Grid': 'grid' in document.documentElement.style
+    };
+    
+    // Add class to body based on feature support
+    Object.keys(features).forEach(feature => {
+        if (features[feature]) {
+            document.body.classList.add(`has-${feature.toLowerCase()}`);
+        } else {
+            document.body.classList.add(`no-${feature.toLowerCase()}`);
+        }
+    });
+})();
