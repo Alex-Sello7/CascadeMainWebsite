@@ -1068,14 +1068,14 @@ section {
 
 /* ===== HERO SECTION ===== */
 .hero-section {
-  min-height: 85vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   position: relative;
   background: linear-gradient(rgba(0, 29, 43, 0.616), rgba(0, 30, 75, 0.726)),
               url('imgs/img1.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: right;
   background-attachment: fixed;
 }
 
