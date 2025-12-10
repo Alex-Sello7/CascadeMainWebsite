@@ -1026,10 +1026,10 @@ section {
 
 .spinner-ring {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: 70%;
+  height: 70%;
   border-radius: 50%;
-  border: 8px solid transparent;
+  border: 3px solid transparent;
   border-top-color: rgba(255, 255, 255, 0.8);
   animation: spin 1.5s linear infinite;
 }
