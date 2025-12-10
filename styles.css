@@ -1609,7 +1609,7 @@ section {
 
 /* ===== HERO SECTION ===== */
 .hero-section {
-  min-height: 100vh;
+  min-height: 75vh;
   display: flex;
   align-items: center;
   position: relative;
