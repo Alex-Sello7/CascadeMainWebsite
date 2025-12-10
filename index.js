@@ -32,12 +32,24 @@ $(document).ready(function () {
     });
   }
 
-  // ===== LOADER FUNCTIONALITY =====
+  // ===== NEW LOADER FUNCTIONALITY =====
   const loader = document.querySelector('.loader');
+  const loaderLongMessage = document.getElementById('loader-long-message');
+  let longLoadTimer;
   
   // Function to hide loader
   function hideLoader() {
       if (loader) {
+          // Clear the "taking longer than usual" timer
+          if (longLoadTimer) {
+              clearTimeout(longLoadTimer);
+          }
+          
+          // Hide the "taking longer than usual" message if it's showing
+          if (loaderLongMessage) {
+              loaderLongMessage.classList.remove('show');
+          }
+          
           // Add hidden class to trigger fade out
           loader.classList.add('hidden');
           
@@ -50,13 +62,23 @@ $(document).ready(function () {
       }
   }
   
+  // Function to show "taking longer than usual" message
+  function showLongLoadMessage() {
+      if (loaderLongMessage && loader && !loader.classList.contains('hidden')) {
+          loaderLongMessage.classList.add('show');
+      }
+  }
+  
   // Method 1: Hide loader when page is fully loaded
   $(window).on('load', hideLoader);
   
-  // Method 2: Fallback - hide loader after 3 seconds max (if page takes too long)
-  setTimeout(hideLoader, 3000);
+  // Method 2: Fallback - hide loader after 8 seconds max (if page takes too long)
+  setTimeout(hideLoader, 8000);
   
-  // Method 3: If all critical elements are loaded, hide loader sooner
+  // Method 3: Show "taking longer than usual" message after 5 seconds
+  longLoadTimer = setTimeout(showLongLoadMessage, 5000);
+  
+  // Method 4: If all critical elements are loaded, hide loader sooner
   const criticalElementsLoaded = () => {
       const heroSection = document.querySelector('.hero-section');
       const navbar = document.querySelector('.navbar');
@@ -439,23 +461,36 @@ $(document).ready(function () {
       submitBtn.find('.btn-text').html('<i class="fas fa-spinner fa-spin me-2"></i> Sending...');
       submitBtn.prop('disabled', true);
 
-      // Get form data
+      // Get ALL form data
       const formData = {
           name: $('#name').val().trim(),
           email: email,
+          phone: $('#phone').val().trim(),
+          company: $('#company').val().trim(),
           service: $('#service').val(),
-          project: $('#project').val().trim()
+          budget: $('#budget').val(),
+          project: $('#project').val().trim(),
+          _subject: 'New Cascade Creations Inquiry',
+          _replyto: email
       };
 
-      
-      
       const formspreeUrl = 'https://formspree.io/f/xjknerpq';
       
-      // Method 2: Email client fallback
-      const subject = `Cascade Creations Inquiry: ${formData.service}`;
-      const body = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0AService: ${formData.service}%0D%0A%0D%0AProject Details:%0D%0A${formData.project}`;
+      // Prepare email fallback content
+      const subject = `Cascade Creations Inquiry: ${formData.service || 'General Inquiry'}`;
+      const body = `
+Name: ${formData.name || 'Not provided'}
+Email: ${formData.email || 'Not provided'}
+Phone: ${formData.phone || 'Not provided'}
+Company: ${formData.company || 'Not provided'}
+Service: ${formData.service || 'Not provided'}
+Budget: ${formData.budget || 'Not provided'}
+
+Project Details:
+${formData.project || 'Not provided'}
+      `.trim();
       
-      // Try Formspree first, fall back to email client
+      // Try Formspree first with all form data
       $.ajax({
           url: formspreeUrl,
           method: 'POST',
@@ -470,7 +505,7 @@ $(document).ready(function () {
               console.log('Formspree failed, falling back to email client');
               
               // Open email client with pre-filled data
-              window.location.href = `mailto:atsello4@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+              window.location.href = `mailto:atsello4@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
               
               showSuccessAlert("Email client opened. Please send the pre-filled email to contact us. We'll respond within 24 hours.");
               
@@ -1079,7 +1114,6 @@ $(document).ready(function () {
 
   // ===== PAGE LOAD COMPLETE ANIMATIONS =====
   function pageLoadAnimations() {
-      
       // Animate tech icons
       $('.tech-icon').each(function(index) {
           $(this).css({

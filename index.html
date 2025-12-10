@@ -6,35 +6,39 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
+
     <!-- Primary Meta Tags -->
-    <title>Cascade Creations | Web Development</title>
+    <title>Cascade Creations | Web Design & Development</title>
     <meta name="title" content="Cascade Creations | Web Development">
-    <meta name="description" content="Crafting Digital Excellence - Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications.">
-    <meta name="keywords" content="web development, web design, responsive websites, custom web applications, digital solutions, frontend development, backend development, South Africa, Pretoria">
+    <meta name="description"
+        content="Crafting Digital Excellence - Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications.">
+    <meta name="keywords"
+        content="web development, web design, responsive websites, custom web applications, digital solutions, frontend development, backend development, South Africa, Pretoria">
     <meta name="author" content="Cascade Creations">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://alex-sello7.github.io/CascadeMainWebsite/">
     <meta property="og:title" content="Cascade Creations | Web Development">
-    <meta property="og:description" content="Crafting Digital Excellence - Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications with precision and creativity.">
+    <meta property="og:description"
+        content="Crafting Digital Excellence - Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications with precision and creativity.">
     <meta property="og:image" content="https://alex-sello7.github.io/CascadeMainWebsite/imgs/cclogo.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Cascade Creations Logo - Digital Solutions that Flow Naturally">
     <meta property="og:site_name" content="Cascade Creations">
     <meta property="og:locale" content="en_US">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://alex-sello7.github.io/CascadeMainWebsite/">
     <meta property="twitter:title" content="Cascade Creations | Web Development">
-    <meta property="twitter:description" content="Crafting Digital Excellence - Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications.">
+    <meta property="twitter:description"
+        content="Crafting Digital Excellence - Creating digital solutions that flow naturally. We specialize in building seamless, responsive web applications.">
     <meta property="twitter:image" content="https://alex-sello7.github.io/CascadeMainWebsite/imgs/cclogo.png">
     <meta name="twitter:site" content="@Alex7_Dev">
     <meta name="twitter:creator" content="@Alex7_Dev">
-    
+
     <!-- Additional OG Tags for Better Social Sharing -->
     <meta property="og:updated_time" content="2024-01-01T00:00:00+02:00">
     <meta property="article:published_time" content="2023-01-01T00:00:00+02:00">
@@ -42,29 +46,29 @@
     <meta property="article:author" content="Cascade Creations">
     <meta property="article:section" content="Technology">
     <meta property="article:tag" content="Web Development">
-    
+
     <!-- LinkedIn Specific -->
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:secure_url" content="https://alex-sello7.github.io/CascadeMainWebsite/imgs/cclogo.png">
-    
+
     <!-- WhatsApp Specific -->
     <meta property="og:image:type" content="image/png">
-    
+
     <!-- Microsoft Specific -->
     <meta name="msapplication-TileImage" content="imgs/cclogo.png">
-    
+
     <!-- Apple Specific -->
     <link rel="apple-touch-icon" sizes="180x180" href="imgs/cclogo.png">
     <meta name="apple-mobile-web-app-title" content="Cascade Creations">
-    
+
     <!-- Theme Color -->
     <meta name="theme-color" content="#2c5aa0">
     <meta name="msapplication-TileColor" content="#2c5aa0">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://alex-sello7.github.io/CascadeMainWebsite/">
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         crossorigin="anonymous">
@@ -77,7 +81,7 @@
         rel="stylesheet">
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
     <!-- Favicon -->
     <link rel="shortcut icon" href="imgs/cclogo.png" type="image/x-icon">
     <link rel="icon" type="image/png" sizes="32x32" href="imgs/cclogo.png">
@@ -130,7 +134,7 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <!-- Additional Social Media Verification -->
     <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID">
     <meta name="twitter:site:id" content="YOUR_TWITTER_SITE_ID">
@@ -143,14 +147,23 @@
         </div>
     <![endif]-->
 
-    <!-- Loader -->
-    <div class="loader">
+    <div class="loader" id="page-loader">
         <div class="loader-container">
-            <div class="loader-content">
-                <div class="loader-progress">
-                    <div class="progress-bar"></div>
+            <!-- Spinner -->
+            <div class="loader-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-center">
+                    <img src="imgs/cclogo.png" alt="Logo">
                 </div>
-                <p class="loader-tagline">Loading. . .</p>
+            </div>
+
+
+            <!-- Taking longer message -->
+            <div class="loader-long-message" id="loader-long-message">
+                <i class="fas fa-clock"></i>
+                Taking longer than usual...
             </div>
         </div>
     </div>
@@ -180,9 +193,6 @@
                         <a class="nav-link" href="#about"> About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#services"> Process</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="#pricing"> Packages</a>
                     </li>
                     <li class="nav-item">
@@ -206,7 +216,7 @@
                     <img src="imgs/cclogo.png" style="max-width: 250px;" alt="Cascade Creations Logo">
                     <h1 class="hero-title" data-aos="fade-up">Cascade Creations</h1>
                     <p class="hero-tagline" data-aos="fade-up" data-aos-delay="200">
-                       Crafting Digital Excellence
+                        Crafting Digital Excellence
                     </p>
                     <div class="btn-group" data-aos="fade-up" data-aos-delay="400">
                         <a href="#portfolio" class="btn btn-primary">What We Do</a>
@@ -317,6 +327,10 @@
                             <div class="tech-item">
                                 <i class="fab fa-node-js node-tech"></i>
                                 <span>Node.js</span>
+                            </div>
+                             <div class="tech-item">
+                                <i class="fab fa-python node-tech"></i>
+                                <span>Python</span>
                             </div>
                             <div class="tech-item">
                                 <i class="fas fa-database db-tech"></i>
@@ -452,7 +466,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- What We Are Known For Section -->
     <section id="portfolio" class="portfolio-section">
         <div class="container">
@@ -520,31 +534,6 @@
         </div>
     </section>
 
-    <!-- Video Section -->
-    <section id="video" class="video-section">
-        <div class="container">
-            <h2 class="section-title text-center" data-aos="fade-up">Creation in Action</h2>
-            <p class="text-center mb-5" data-aos="fade-up" data-aos-delay="200">
-                See our development process and previous work
-            </p>
-            <div class="row">
-                <div class="col-lg-10 mx-auto" data-aos="zoom-in">
-                    <div class="video-container">
-                        <video id="portfolioVideo" preload="metadata" playsinline>
-                            <source src="imgs/vid1.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <div class="video-overlay">
-                            <button id="playButton" class="play-btn" aria-label="Play video">
-                                <i class="fas fa-play" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Call to Action -->
     <section class="cta-section">
         <div class="container">
@@ -555,8 +544,7 @@
                         Let Cascade Creations bring your ideas to life. Contact us today to discuss your project
                         requirements and get a free consultation.
                     </p>
-                    <a href="#contact" class="btn cta-btn" data-aos="zoom-in"
-                        data-aos-delay="400">
+                    <a href="#contact" class="btn cta-btn" data-aos="zoom-in" data-aos-delay="400">
                         Start Your Project <i class="fas fa-arrow-right ms-2" aria-hidden="true"></i>
                     </a>
                 </div>
@@ -668,6 +656,7 @@
         </div>
     </section>
 
+
     <!-- Contact Section -->
     <section id="contact" class="contact-section">
         <div class="container">
@@ -681,7 +670,7 @@
                     <div class="contact-sidebar h-100">
                         <h4 class="mb-4">Get In Touch</h4>
                         <p class="contact-intro mb-4">Prefer direct contact? Here's how to reach us:</p>
-                        
+
                         <div class="contact-details">
                             <div class="contact-detail-item">
                                 <div class="detail-icon unified-icon">
@@ -692,7 +681,7 @@
                                     <p>Pretoria, Gauteng<br>South Africa</p>
                                 </div>
                             </div>
-                            
+
                             <div class="contact-detail-item">
                                 <div class="detail-icon unified-icon">
                                     <i class="fas fa-phone"></i>
@@ -703,7 +692,7 @@
                                     <small>Mon-Fri: 8AM-6PM</small>
                                 </div>
                             </div>
-                            
+
                             <div class="contact-detail-item">
                                 <div class="detail-icon unified-icon">
                                     <i class="fas fa-envelope"></i>
@@ -714,7 +703,7 @@
                                     <small>Response within 24 hours</small>
                                 </div>
                             </div>
-                            
+
                             <div class="contact-detail-item">
                                 <div class="detail-icon unified-icon">
                                     <i class="fas fa-clock"></i>
@@ -722,28 +711,28 @@
                                 <div class="detail-content">
                                     <h5>Business Hours</h5>
                                     <p>Monday - Friday: 8AM - 6PM<br>
-                                       Saturday: 9AM - 2PM<br>
-                                       Sunday: Closed</p>
+                                        Saturday: 9AM - 2PM<br>
+                                        Sunday: Closed</p>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="social-contact mt-4">
                             <h5 class="mb-3">Follow Us</h5>
                             <div class="social-icons">
-                                <a href="https://github.com/Alex-Sello7" aria-label="GitHub" class="social-icon unified-icon">
+                                <a href="https://github.com/Alex-Sello7" aria-label="GitHub"
+                                    class="social-icon unified-icon">
                                     <i class="fab fa-github"></i>
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Contact Form -->
                 <div class="col-lg-8" data-aos="fade-left">
-                    <div class="contact-form h-100">
-                        <!-- Formspree Form -->
-                        <form id="contactForm" novalidate>
+                    <div class="contact-form-container">
+                        <form id="contactForm" action="https://formspree.io/f/xjknerpq" method="POST" novalidate>
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -803,10 +792,16 @@
                                     placeholder="Tell us about your project..."></textarea>
                                 <div class="invalid-feedback">Please provide project details.</div>
                             </div>
-                            <!-- Hidden fields for Formspree -->
+
+                            <!-- Formspree Hidden Fields -->
+                            <input type="text" name="_gotcha" style="display:none">
                             <input type="hidden" name="_subject" value="New Cascade Creations Inquiry">
                             <input type="hidden" name="_replyto" value="" id="email-field">
-                            <input type="text" name="_gotcha" style="display:none">
+                            <input type="hidden" name="_format" value="plain">
+                            <input type="hidden" name="_language" value="en">
+
+                            <!-- Honeypot field to prevent spam -->
+                            <input type="text" name="_honeypot" style="display:none">
 
                             <div class="text-center">
                                 <button type="submit" class="btn btn-submit unified-icon" id="submitBtn">
@@ -837,12 +832,12 @@
                 <div class="col-lg-8" data-aos="fade-right">
                     <h2 class="cta-secondary-title">Let's Build Something Amazing Together</h2>
                     <p class="cta-secondary-text">
-                       And have some fun too...
+                        And have some fun too...
                     </p>
                 </div>
                 <div class="col-lg-4 text-end" data-aos="fade-left" data-aos-delay="200">
                     <a href="https://alex-sello7.github.io/CascadeComingSoon/" class="btn cta-secondary-btn">
-                      Go To Studio <i class="fas fa-rocket ms-2"></i>
+                        Go To Studio <i class="fas fa-rocket ms-2"></i>
                     </a>
                 </div>
             </div>
@@ -871,7 +866,7 @@
                     <ul class="footer-links">
                         <li><a href="#home"><i class="fas fa-chevron-right" aria-hidden="true"></i> Home</a></li>
                         <li><a href="#about"><i class="fas fa-chevron-right" aria-hidden="true"></i> About</a></li>
-                        <li><a href="#services"><i class="fas fa-chevron-right" aria-hidden="true"></i> Process</a></li>
+                        <li><a href="#pricing"><i class="fas fa-chevron-right" aria-hidden="true"></i> Packages</a></li>
                         <li><a href="#contact"><i class="fas fa-chevron-right" aria-hidden="true"></i> Contact</a></li>
                     </ul>
                 </div>
