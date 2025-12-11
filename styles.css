@@ -1019,8 +1019,8 @@ section {
 
 .loader-spinner {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   margin: 0 auto 30px;
 }
 
