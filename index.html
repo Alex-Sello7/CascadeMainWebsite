@@ -206,24 +206,59 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero-section">
-        <div class="particle-container" id="particle-container"></div>
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8 mx-auto text-center hero-content">
-                    <img src="imgs/cclogo.png" style="max-width: 250px;" alt="Cascade Creations Logo">
-                    <h1 class="hero-title" data-aos="fade-up">Cascade Creations</h1>
-                    <p class="hero-tagline" data-aos="fade-up" data-aos-delay="200">
-                        Crafting Digital Excellence
-                    </p>
-                    <div class="btn-group" data-aos="fade-up" data-aos-delay="400">
-                        <a href="#portfolio" class="btn btn-primary">What We Do</a>
-                        <a href="#contact" class="btn btn-outline">Get In Touch</a>
+<section id="home" class="hero-section">
+    <div class="container-fluid hero-container">
+        <div class="row g-0 h-100">
+            <!-- Left Side - Text Content -->
+            <div class="col-lg-6 hero-left">
+                <div class="hero-left-content">
+                    <div class="hero-text-wrapper">
+                        <h1 class="hero-title">
+                            <span class="hero-title-line">Welcome to</span>
+                            <span class="hero-title-line">Cascade Creations</span>
+                        </h1>
+                        
+                        <!-- Typing Text Container -->
+                        <div class="typing-container">
+                            <div class="typing-text">
+                                <span class="typing-cursor">|</span>
+                            </div>
+                            <div class="typing-sentences" style="display: none;">
+                                <div class="sentence">Crafting Digital Excellence.</div>
+                                <div class="sentence">Creating digital solutions that flow naturally.</div>
+                                <div class="sentence">Building seamless, responsive web applications.</div>
+                                <div class="sentence">From concept to completion with precision.</div>
+                                <div class="sentence">Innovative design meets robust engineering.</div>
+                            </div>
+                        </div>
+                        
+                        <p class="hero-description">
+                            We specialize in transforming ideas into digital experiences that captivate, engage, and deliver results.
+                        </p>
+                        
+                        <div class="btn-group" data-aos="fade-up" data-aos-delay="400">
+                            <a href="#portfolio" class="btn btn-primary">What We Do</a>
+                            <a href="#contact" class="btn btn-outline">Get In Touch</a>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Right Side - Logo -->
+            <div class="col-lg-6 hero-right">
+                <div class="hero-logo-container">
+                    <img src="imgs/cclogo.png" alt="Cascade Creations Logo" class="hero-logo">
+                    <div class="logo-glow"></div>
+                </div>
+            </div>
+            
+            <!-- Wave Style Divider -->
+            <div class="hero-divider">
+                <div class="divider-curve"></div>
+            </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- About Section -->
     <section id="about" class="about-section">
@@ -935,6 +970,77 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <!-- Custom JS -->
     <script src="index.js"></script>
+
+    <script>
+        // Typing Animation for Hero Section
+document.addEventListener('DOMContentLoaded', function() {
+    // Typing effect
+    const typingText = document.querySelector('.typing-text');
+    const sentences = document.querySelectorAll('.typing-sentences .sentence');
+    const typingCursor = document.querySelector('.typing-cursor');
+    
+    if (typingText && sentences.length > 0) {
+        let sentenceIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let isPaused = false;
+        
+        function typeText() {
+            if (isPaused) return;
+            
+            const currentSentence = sentences[sentenceIndex].textContent;
+            
+            if (!isDeleting) {
+                // Typing forward
+                typingText.textContent = currentSentence.substring(0, charIndex + 1);
+                charIndex++;
+                
+                if (charIndex === currentSentence.length) {
+                    isPaused = true;
+                    setTimeout(() => {
+                        isPaused = false;
+                        isDeleting = true;
+                        setTimeout(typeText, 500);
+                    }, 2000); // Pause at end of sentence
+                    return;
+                }
+            } else {
+                // Deleting
+                typingText.textContent = currentSentence.substring(0, charIndex - 1);
+                charIndex--;
+                
+                if (charIndex === 0) {
+                    isDeleting = false;
+                    sentenceIndex = (sentenceIndex + 1) % sentences.length;
+                }
+            }
+            
+            // Add cursor back (since we're replacing text)
+            if (!typingText.querySelector('.typing-cursor')) {
+                const cursor = document.createElement('span');
+                cursor.className = 'typing-cursor';
+                cursor.textContent = '|';
+                typingText.appendChild(cursor);
+            }
+            
+            // Typing speed
+            const typingSpeed = isDeleting ? 50 : 100;
+            setTimeout(typeText, typingSpeed);
+        }
+        
+        // Start typing animation after a delay
+        setTimeout(typeText, 1000);
+        
+        // Make cursor blink when not typing
+        function blinkCursor() {
+            if (typingCursor) {
+                typingCursor.style.animation = 'blink 1s infinite';
+            }
+        }
+        blinkCursor();
+    }
+});
+    </script>
 
     <!-- Polyfills for older browsers -->
     <script>
