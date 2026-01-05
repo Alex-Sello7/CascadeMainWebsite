@@ -327,6 +327,56 @@ a:hover {
         transition: width 0.01ms linear !important;
     }
 }
+/* Status Bar Styles - UPDATED */
+.status-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    margin: 2rem 0 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+.status-percentage {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    text-align: center;
+    display: block;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+}
+
+.status-message {
+    font-size: 0.875rem;
+    color: var(--gray);
+    text-align: center;
+    display: block;
+    width: 100%;
+    height: 20px;
+    line-height: 20px;
+    transition: color 0.3s ease;
+}
+
+.status-message.warning {
+    color: var(--secondary);
+    animation: pulseWarning 1s ease-in-out infinite;
+}
 
 /* ===== DARK MODE TOGGLE ===== */
 .dark-mode-toggle {
@@ -432,7 +482,7 @@ body.dark-mode .dark-mode-toggle .fa-sun {
     top: 0;
     left: 0;
     width: 100%;
-    border-radius: 0 30px 30px 0;
+    border-radius: 0 0 20px 20px;
     background: rgba(255, 255, 255, 0.159);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);

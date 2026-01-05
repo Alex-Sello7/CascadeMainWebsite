@@ -11,120 +11,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ===== NEW LOADING SCREEN WITH STATUS BAR =====
-    const loadingScreen = document.getElementById('loadingScreen');
-    const statusBar = document.createElement('div');
-    const statusFill = document.createElement('div');
-    const statusPercentage = document.createElement('div');
-    const statusMessage = document.createElement('div');
-    
-    // Create status bar elements
-    statusBar.className = 'status-bar';
-    statusFill.className = 'status-fill';
-    statusPercentage.className = 'status-percentage';
-    statusMessage.className = 'status-message';
-    
-    statusBar.appendChild(statusFill);
-    statusBar.appendChild(statusPercentage);
-    statusBar.appendChild(statusMessage);
-    
-    // Add status bar to loading screen
-    const loadingContent = loadingScreen.querySelector('.loading-content');
-    loadingContent.appendChild(statusBar);
-    
-    // Variables for loading animation
-    let progress = 0;
-    let loadingInterval;
-    let isTakingLong = false;
-    const maxProgress = 100;
-    const incrementSpeed = 1; // Percentage per interval
-    const intervalTime = 30; // ms per increment
-    const longLoadThreshold = 8000; // 8 seconds in ms
-    let loadingStartTime;
-    
-    // Start loading animation
-    function startLoadingAnimation() {
-        loadingStartTime = Date.now();
-        progress = 0;
-        isTakingLong = false;
-        statusPercentage.textContent = '0%';
-        statusMessage.textContent = 'Loading...';
-        
-        loadingInterval = setInterval(() => {
-            // Simulate progress
-            progress += incrementSpeed;
-            
-            // Check if it's taking too long
-            const elapsedTime = Date.now() - loadingStartTime;
-            if (!isTakingLong && elapsedTime > longLoadThreshold) {
-                isTakingLong = true;
-                statusMessage.textContent = 'Taking longer than usual...';
-                statusMessage.classList.add('warning');
-            }
-            
-            // Update progress bar
-            if (progress <= maxProgress) {
-                statusFill.style.width = progress + '%';
-                statusPercentage.textContent = progress + '%';
-            }
-            
-            // Stop at 95% for suspense
-            if (progress >= 95) {
-                clearInterval(loadingInterval);
-            }
-        }, intervalTime);
-    }
-    
-    // Complete loading animation
-    function completeLoadingAnimation() {
-        clearInterval(loadingInterval);
-        
-        // Animate to 100%
-        const completeAnimation = setInterval(() => {
-            if (progress < 100) {
-                progress += 2;
-                statusFill.style.width = progress + '%';
-                statusPercentage.textContent = progress + '%';
-            } else {
-                clearInterval(completeAnimation);
-                
-                // Hide loading screen
-                setTimeout(() => {
-                    loadingScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                    }, 500);
-                }, 300);
-            }
-        }, 10);
-    }
-    
-    // Start loading animation immediately
-    startLoadingAnimation();
-    
-    // Hide loading screen after page load
-    function hideLoadingScreen() {
-        // Wait for both page load and minimum 1.5s loading time
-        const minLoadTime = 1500;
-        const elapsedTime = Date.now() - loadingStartTime;
-        
-        if (elapsedTime < minLoadTime) {
-            setTimeout(completeLoadingAnimation, minLoadTime - elapsedTime);
-        } else {
-            completeLoadingAnimation();
-        }
-    }
-    
-    window.addEventListener('load', hideLoadingScreen);
-    
-    // Fallback: complete loading after 15 seconds max
-    setTimeout(() => {
-        if (loadingScreen.style.display !== 'none') {
-            completeLoadingAnimation();
-            console.log('Loading timeout - forced completion');
-        }
-    }, 15000);
+   // ===== NEW LOADING SCREEN WITH STATUS BAR =====
+const loadingScreen = document.getElementById('loadingScreen');
+const statusBar = document.createElement('div');
+const statusFill = document.createElement('div');
+const statusPercentage = document.createElement('div');
+const statusMessage = document.createElement('div');
 
+// Create status bar elements
+statusBar.className = 'status-bar';
+statusFill.className = 'status-fill';
+statusPercentage.className = 'status-percentage';
+statusMessage.className = 'status-message';
+
+statusBar.appendChild(statusFill);
+statusPercentage.textContent = '0%';
+statusMessage.textContent = 'Initializing...';
+
+// Add status bar to loading screen
+const loadingContent = loadingScreen.querySelector('.loading-content');
+loadingContent.appendChild(statusPercentage);
+loadingContent.appendChild(statusBar);
+loadingContent.appendChild(statusMessage);
+
+// Variables for loading animation
+let progress = 0;
+let loadingInterval;
+const maxProgress = 100;
+const intervalTime = 50; // ms per increment
+let loadingStartTime;
+
+// Start loading animation
+function startLoadingAnimation() {
+    loadingStartTime = Date.now();
+    progress = 0;
+    statusPercentage.textContent = '0%';
+    statusMessage.textContent = 'Initializing...';
+    
+    loadingInterval = setInterval(() => {
+        // Increment progress
+        progress += 1;
+        
+        // Update progress bar
+        statusFill.style.width = progress + '%';
+        statusPercentage.textContent = progress + '%';
+        
+        // Update messages based on progress
+        if (progress < 20) {
+            statusMessage.textContent = 'Loading assets...';
+        } else if (progress < 40) {
+            statusMessage.textContent = 'Initializing components...';
+        } else if (progress < 60) {
+            statusMessage.textContent = 'Setting up interface...';
+        } else if (progress < 80) {
+            statusMessage.textContent = 'Almost there...';
+        } else if (progress < 95) {
+            statusMessage.textContent = 'Finalizing...';
+        }
+        
+        // Stop at 95%
+        if (progress >= 95) {
+            clearInterval(loadingInterval);
+        }
+    }, intervalTime);
+}
+
+// Complete loading animation
+function completeLoadingAnimation() {
+    clearInterval(loadingInterval);
+    
+    // Count up from current progress to 100%
+    const finalCountUp = setInterval(() => {
+        if (progress < 100) {
+            progress += 1;
+            statusFill.style.width = progress + '%';
+            statusPercentage.textContent = progress + '%';
+            statusMessage.textContent = progress >= 99 ? 'Ready!' : 'Finalizing...';
+        } else {
+            clearInterval(finalCountUp);
+            
+            // Hide loading screen
+            setTimeout(() => {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 500);
+        }
+    }, 20);
+}
+
+// Start loading animation immediately
+startLoadingAnimation();
+
+// Hide loading screen after page load
+window.addEventListener('load', function() {
+    // Wait a minimum time for the animation
+    setTimeout(completeLoadingAnimation, 1000);
+});
+
+// Fallback timeout
+setTimeout(() => {
+    if (loadingScreen.style.display !== 'none') {
+        completeLoadingAnimation();
+    }
+}, 10000);
     // ===== DARK MODE =====
     const darkModeToggle = document.getElementById('darkModeToggle');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -1093,28 +1084,6 @@ ${data.message}`.trim());
         window.addEventListener('load', setViewport);
         window.addEventListener('resize', debounce(setViewport, 250));
         setViewport(); // Initial call
-        
-        // Prevent zooming on input focus in iOS
-        document.addEventListener('DOMContentLoaded', function() {
-            const viewport = document.querySelector('meta[name="viewport"]');
-            const inputs = document.querySelectorAll('input, select, textarea');
-            
-            inputs.forEach(function(input) {
-                input.addEventListener('focus', function() {
-                    if (viewport) {
-                        viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
-                    }
-                });
-                
-                input.addEventListener('blur', function() {
-                    setTimeout(function() {
-                        if (viewport) {
-                            viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover";
-                        }
-                    }, 500);
-                });
-            });
-        });
     })();
 
     // ===== INITIALIZE COMPONENTS =====
