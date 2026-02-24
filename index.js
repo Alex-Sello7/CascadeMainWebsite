@@ -9,17 +9,333 @@ document.addEventListener('DOMContentLoaded', function() {
         disable: function() { return window.innerWidth < 768; }
     });
 
-    // ===== LOADING SCREEN — 3 BOUNCING BALLS =====
+    // ===== FULL-PAGE SUNRISE LOADING SCREEN =====
     const loadingScreen = document.getElementById('loadingScreen');
+    const canvas = document.getElementById('sunriseCanvas');
+    const ctx = canvas.getContext('2d');
 
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            loadingScreen.style.opacity = '0';
+    let animFrameId;
+    let startTime = null;
+    const TOTAL_DURATION = 3000; // ms total before fade
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Brand colours — logo is cyan→navy, rays/glow match
+    const C = {
+        primaryDark:  [11,  42,  66],   // #0b2a42
+        primary:      [30,  60,  92],   // #1e3c5c
+        primaryLight: [46,  90, 130],   // #2e5a82
+        secondary:    [212, 90,  74],   // #d45a4a (sky warmth at horizon)
+        secondaryLt:  [225,123, 107],
+        cyan:         [0,  195, 255],   // logo bright cyan top
+        cyanMid:      [0,  160, 220],   // logo mid cyan
+        cyanDeep:     [15,  85, 140],   // logo deep navy-blue
+        skyHigh:      [14,  55,  90],
+        skyMid:       [25,  80, 120],
+    };
+
+    // Preload the logo image
+    const logoImg = new Image();
+    logoImg.src = 'imgs/cclogo.png';
+
+    // Stars (visible at start, fade as sun rises)
+    const NUM_STARS = 180;
+    const stars = Array.from({ length: NUM_STARS }, () => ({
+        x: Math.random(),
+        y: Math.random() * 0.65,
+        r: Math.random() * 1.4 + 0.3,
+        opacity: Math.random() * 0.8 + 0.2,
+        twinkle: Math.random() * Math.PI * 2,
+        twinkleSpeed: Math.random() * 0.03 + 0.01,
+    }));
+
+    // Horizon clouds / streaks (light rays)
+    const NUM_RAYS = 14;
+    const rays = Array.from({ length: NUM_RAYS }, (_, i) => ({
+        angle: -Math.PI / 2 + (i - NUM_RAYS / 2) * (Math.PI / NUM_RAYS) * 1.6,
+        width: 0.015 + Math.random() * 0.025,
+        length: 0.55 + Math.random() * 0.35,
+        opacity: 0.06 + Math.random() * 0.12,
+    }));
+
+    // Horizon mountain silhouette points (normalized 0-1)
+    const horizonPoints = (() => {
+        const pts = [];
+        const steps = 120;
+        for (let i = 0; i <= steps; i++) {
+            const x = i / steps;
+            // Two mountain ridges layered
+            const m1 = 0.08 * Math.sin(x * Math.PI * 3.2 + 0.5)
+                      + 0.05 * Math.sin(x * Math.PI * 7   + 1.2)
+                      + 0.03 * Math.sin(x * Math.PI * 14  + 0.8);
+            pts.push({ x, y: m1 });
+        }
+        return pts;
+    })();
+
+    const horizonPoints2 = (() => {
+        const pts = [];
+        const steps = 120;
+        for (let i = 0; i <= steps; i++) {
+            const x = i / steps;
+            const m2 = 0.055 * Math.sin(x * Math.PI * 4.5 + 2.1)
+                     + 0.03  * Math.sin(x * Math.PI * 9   + 0.3)
+                     + 0.02  * Math.sin(x * Math.PI * 18  + 1.5);
+            pts.push({ x, y: m2 });
+        }
+        return pts;
+    })();
+
+    // Gentle floating particles (dust/pollen in the air)
+    const NUM_MOTES = 60;
+    const motes = Array.from({ length: NUM_MOTES }, () => ({
+        x: Math.random(),
+        y: 0.45 + Math.random() * 0.5,
+        r: Math.random() * 1.8 + 0.5,
+        vx: (Math.random() - 0.5) * 0.00008,
+        vy: -Math.random() * 0.00012 - 0.00003,
+        opacity: Math.random() * 0.35 + 0.1,
+    }));
+
+    function lerp(a, b, t) { return a + (t - a) * t; }
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+    function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; } // easeInOut
+
+    function rgbLerp(c1, c2, t) {
+        return [
+            Math.round(c1[0] + (c2[0] - c1[0]) * t),
+            Math.round(c1[1] + (c2[1] - c1[1]) * t),
+            Math.round(c1[2] + (c2[2] - c1[2]) * t),
+        ];
+    }
+    function rgb(c, a) {
+        return a !== undefined
+            ? `rgba(${c[0]},${c[1]},${c[2]},${a})`
+            : `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+
+    function draw(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const t = clamp(elapsed / TOTAL_DURATION, 0, 1); // 0 → 1
+        const et = ease(t);
+
+        const W = canvas.width;
+        const H = canvas.height;
+
+        // Sun position: rises from below horizon to about 30% up the screen
+        const horizonY = H * 0.62;
+        const sunR = Math.min(W, H) * 0.09;
+        const sunCX = W * 0.5;
+        const sunStartY = horizonY + sunR * 1.5;
+        const sunEndY   = horizonY - H * 0.28;
+        const sunCY = sunStartY + (sunEndY - sunStartY) * et;
+
+        // ── Sky gradient ─────────────────────────────────────────────────
+        // At t=0: deep navy night. At t=1: rich dawn blue-to-coral.
+        const skyTopNight  = C.primaryDark;
+        const skyTopDay    = C.skyHigh;
+        const skyMidNight  = C.primary;
+        const skyMidDay    = C.primaryLight;
+        const skyLowNight  = C.primaryDark;
+        const skyLowDay    = [30, 100, 150]; // cyan-lit horizon
+
+        const skyTop  = rgbLerp(skyTopNight,  skyTopDay,  et);
+        const skyMid  = rgbLerp(skyMidNight,  skyMidDay,  et);
+        const skyLow  = rgbLerp(skyLowNight,  skyLowDay,  et);
+
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+        skyGrad.addColorStop(0,    rgb(skyTop));
+        skyGrad.addColorStop(0.45, rgb(skyMid));
+        skyGrad.addColorStop(0.85, rgb(skyLow));
+        skyGrad.addColorStop(1,    rgb(rgbLerp(skyLow, C.cyanDeep, et * 0.6)));
+
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── Ground / water below horizon ─────────────────────────────────
+        const groundGrad = ctx.createLinearGradient(0, horizonY, 0, H);
+        const groundTop = rgbLerp(C.primaryDark, [20, 50, 75], et);
+        const groundBot = rgbLerp([5, 15, 30],   [8, 28, 50], et);
+        groundGrad.addColorStop(0, rgb(groundTop));
+        groundGrad.addColorStop(1, rgb(groundBot));
+        ctx.fillStyle = groundGrad;
+        ctx.fillRect(0, horizonY, W, H - horizonY);
+
+        // ── Stars (fade out as sun rises) ────────────────────────────────
+        const starFade = clamp(1 - et * 2.5, 0, 1);
+        if (starFade > 0) {
+            stars.forEach(s => {
+                s.twinkle += s.twinkleSpeed;
+                const tw = 0.5 + 0.5 * Math.sin(s.twinkle);
+                ctx.beginPath();
+                ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${s.opacity * tw * starFade})`;
+                ctx.fill();
+            });
+        }
+
+        // ── Logo glow / corona (wide halo, cyan-blue to match logo) ─────
+        const glowRadius = sunR * (5 + et * 8);
+        const sunGlow = ctx.createRadialGradient(sunCX, sunCY, sunR * 0.5, sunCX, sunCY, glowRadius);
+        sunGlow.addColorStop(0,   rgb(C.cyan,        0.40 * et));
+        sunGlow.addColorStop(0.2, rgb(C.cyanMid,     0.25 * et));
+        sunGlow.addColorStop(0.5, rgb(C.cyanDeep,    0.12 * et));
+        sunGlow.addColorStop(1,   rgb(C.primaryDark, 0));
+        ctx.fillStyle = sunGlow;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── Light rays from logo (cyan-blue to match logo gradient) ────────
+        if (et > 0.1) {
+            const rayOpacity = clamp((et - 0.1) / 0.5, 0, 1);
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            rays.forEach(ray => {
+                const rx1 = sunCX;
+                const ry1 = sunCY;
+                const rx2 = sunCX + Math.cos(ray.angle) * W * ray.length;
+                const ry2 = sunCY + Math.sin(ray.angle) * H * ray.length;
+                const rayGrad = ctx.createLinearGradient(rx1, ry1, rx2, ry2);
+                rayGrad.addColorStop(0,   `rgba(0,210,255,${ray.opacity * rayOpacity * 0.95})`);
+                rayGrad.addColorStop(0.3, `rgba(0,160,220,${ray.opacity * rayOpacity * 0.5})`);
+                rayGrad.addColorStop(0.7, `rgba(15,85,140,${ray.opacity * rayOpacity * 0.2})`);
+                rayGrad.addColorStop(1,   `rgba(11,42,66,0)`);
+                ctx.strokeStyle = rayGrad;
+                ctx.lineWidth = W * ray.width;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(rx1, ry1);
+                ctx.lineTo(rx2, ry2);
+                ctx.stroke();
+            });
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.restore();
+        }
+
+        // ── Horizon cyan glow band ────────────────────────────────────────
+        const horizGlow = ctx.createRadialGradient(sunCX, horizonY, 0, sunCX, horizonY, W * 0.65);
+        horizGlow.addColorStop(0,   rgb(C.cyan,        0.45 * et));
+        horizGlow.addColorStop(0.25,rgb(C.cyanMid,     0.28 * et));
+        horizGlow.addColorStop(0.6, rgb(C.primaryLight, 0.1 * et));
+        horizGlow.addColorStop(1,   rgb(C.primaryDark, 0));
+        ctx.fillStyle = horizGlow;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── Logo rising (replacing sun disc) ─────────────────────────────
+        const logoOpacity = Math.min(1, et * 2.5);
+        const logoSize = sunR * 2.2; // diameter
+        if (logoImg.complete && logoImg.naturalWidth > 0) {
+            ctx.save();
+            ctx.globalAlpha = logoOpacity;
+            // Soft circular clip so logo blends into glow like a rising sun
+            ctx.beginPath();
+            ctx.arc(sunCX, sunCY, sunR * 1.05, 0, Math.PI * 2);
+            ctx.clip();
+            ctx.drawImage(logoImg,
+                sunCX - logoSize / 2,
+                sunCY - logoSize / 2,
+                logoSize,
+                logoSize
+            );
+            ctx.restore();
+        } else {
+            // Fallback: cyan disc if image not loaded yet
+            const fallback = ctx.createRadialGradient(sunCX, sunCY, 0, sunCX, sunCY, sunR);
+            fallback.addColorStop(0,   rgb(C.cyan,     logoOpacity));
+            fallback.addColorStop(0.6, rgb(C.cyanMid,  logoOpacity));
+            fallback.addColorStop(1,   rgb(C.cyanDeep, logoOpacity));
+            ctx.fillStyle = fallback;
+            ctx.beginPath();
+            ctx.arc(sunCX, sunCY, sunR, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // ── Water reflections (cyan logo shimmer) ─────────────────────────
+        if (et > 0.15) {
+            const reflOpacity = clamp((et - 0.15) / 0.4, 0, 0.45);
+            for (let col = -3; col <= 3; col++) {
+                const rx = sunCX + col * (W * 0.04);
+                const rw = W * 0.018 * (1 - Math.abs(col) * 0.25);
+                const reflGrad = ctx.createLinearGradient(0, horizonY, 0, H * 0.85);
+                reflGrad.addColorStop(0,   rgb(C.cyan,        reflOpacity * 0.9));
+                reflGrad.addColorStop(0.3, rgb(C.cyanDeep,    reflOpacity * 0.5));
+                reflGrad.addColorStop(1,   rgb(C.primaryDark, 0));
+                ctx.fillStyle = reflGrad;
+                ctx.beginPath();
+                ctx.ellipse(rx, horizonY + (H - horizonY) * 0.3, rw, (H - horizonY) * 0.55, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // ── Mountain silhouette back layer ───────────────────────────────
+        const mtn2Color = rgbLerp(C.primaryDark, [15, 45, 68], et);
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        horizonPoints2.forEach(p => {
+            ctx.lineTo(p.x * W, horizonY - p.y * H * 1.1);
+        });
+        ctx.lineTo(W, H);
+        ctx.closePath();
+        ctx.fillStyle = rgb(mtn2Color);
+        ctx.fill();
+
+        // ── Mountain silhouette front layer ──────────────────────────────
+        const mtn1Color = rgbLerp(C.primaryDark, [10, 32, 52], et * 0.8);
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        horizonPoints.forEach(p => {
+            ctx.lineTo(p.x * W, horizonY - p.y * H * 1.35);
+        });
+        ctx.lineTo(W, H);
+        ctx.closePath();
+        ctx.fillStyle = rgb(mtn1Color);
+        ctx.fill();
+
+        // ── Floating dust motes (lit by cyan logo light) ──────────────────
+        if (et > 0.3) {
+            const moteOpacity = clamp((et - 0.3) / 0.4, 0, 1);
+            motes.forEach(m => {
+                m.x += m.vx;
+                m.y += m.vy;
+                if (m.y < 0.3) { m.y = 0.65 + Math.random() * 0.3; m.x = Math.random(); }
+                ctx.beginPath();
+                ctx.arc(m.x * W, m.y * H, m.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0,195,255,${m.opacity * moteOpacity * 0.6})`;
+                ctx.fill();
+            });
+        }
+
+        // ── Vignette ─────────────────────────────────────────────────────
+        const vign = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.85);
+        vign.addColorStop(0, 'rgba(0,0,0,0)');
+        vign.addColorStop(1, `rgba(5,15,28,${0.5 + et * 0.15})`);
+        ctx.fillStyle = vign;
+        ctx.fillRect(0, 0, W, H);
+
+        if (t < 1) {
+            animFrameId = requestAnimationFrame(draw);
+        } else {
+            // Hold for a moment then fade out
             setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 500);
-        }, 1200);
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    cancelAnimationFrame(animFrameId);
+                }, 1000);
+            }, 300);
+        }
+    }
+
+    window.addEventListener('load', function () {
+        animFrameId = requestAnimationFrame(draw);
     });
+
+
 
     // ===== NAVIGATION SCROLL EFFECT - IMPROVED =====
     const navbar = document.querySelector('.navbar');
