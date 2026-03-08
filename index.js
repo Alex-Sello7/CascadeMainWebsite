@@ -1,613 +1,369 @@
 // ===== DOM READY =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize AOS
-    AOS.init({
-        duration: 800,
-        easing: 'ease-out',
-        once: true,
-        offset: 100,
-        disable: function() { return window.innerWidth < 768; }
-    });
+document.addEventListener('DOMContentLoaded', function () {
 
-    // ===== FULL-PAGE SUNRISE LOADING SCREEN =====
+    // ===== CINEMATIC LOADER =====
     const loadingScreen = document.getElementById('loadingScreen');
-    const canvas = document.getElementById('sunriseCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let animFrameId;
-    let startTime = null;
-    const TOTAL_DURATION = 3000; // ms total before fade
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Brand colours — logo is cyan→navy, rays/glow match
-    const C = {
-        primaryDark:  [11,  42,  66],   // #0b2a42
-        primary:      [30,  60,  92],   // #1e3c5c
-        primaryLight: [46,  90, 130],   // #2e5a82
-        secondary:    [212, 90,  74],   // #d45a4a (sky warmth at horizon)
-        secondaryLt:  [225,123, 107],
-        cyan:         [0,  195, 255],   // logo bright cyan top
-        cyanMid:      [0,  160, 220],   // logo mid cyan
-        cyanDeep:     [15,  85, 140],   // logo deep navy-blue
-        skyHigh:      [14,  55,  90],
-        skyMid:       [25,  80, 120],
-    };
-
-    // Preload the logo image
-    const logoImg = new Image();
-    logoImg.src = 'imgs/cclogo.png';
-
-    // Stars (visible at start, fade as sun rises)
-    const NUM_STARS = 180;
-    const stars = Array.from({ length: NUM_STARS }, () => ({
-        x: Math.random(),
-        y: Math.random() * 0.65,
-        r: Math.random() * 1.4 + 0.3,
-        opacity: Math.random() * 0.8 + 0.2,
-        twinkle: Math.random() * Math.PI * 2,
-        twinkleSpeed: Math.random() * 0.03 + 0.01,
-    }));
-
-    // Horizon clouds / streaks (light rays)
-    const NUM_RAYS = 14;
-    const rays = Array.from({ length: NUM_RAYS }, (_, i) => ({
-        angle: -Math.PI / 2 + (i - NUM_RAYS / 2) * (Math.PI / NUM_RAYS) * 1.6,
-        width: 0.015 + Math.random() * 0.025,
-        length: 0.55 + Math.random() * 0.35,
-        opacity: 0.06 + Math.random() * 0.12,
-    }));
-
-    // Horizon mountain silhouette points (normalized 0-1)
-    const horizonPoints = (() => {
-        const pts = [];
-        const steps = 120;
-        for (let i = 0; i <= steps; i++) {
-            const x = i / steps;
-            // Two mountain ridges layered
-            const m1 = 0.08 * Math.sin(x * Math.PI * 3.2 + 0.5)
-                      + 0.05 * Math.sin(x * Math.PI * 7   + 1.2)
-                      + 0.03 * Math.sin(x * Math.PI * 14  + 0.8);
-            pts.push({ x, y: m1 });
-        }
-        return pts;
-    })();
-
-    const horizonPoints2 = (() => {
-        const pts = [];
-        const steps = 120;
-        for (let i = 0; i <= steps; i++) {
-            const x = i / steps;
-            const m2 = 0.055 * Math.sin(x * Math.PI * 4.5 + 2.1)
-                     + 0.03  * Math.sin(x * Math.PI * 9   + 0.3)
-                     + 0.02  * Math.sin(x * Math.PI * 18  + 1.5);
-            pts.push({ x, y: m2 });
-        }
-        return pts;
-    })();
-
-    // Gentle floating particles (dust/pollen in the air)
-    const NUM_MOTES = 60;
-    const motes = Array.from({ length: NUM_MOTES }, () => ({
-        x: Math.random(),
-        y: 0.45 + Math.random() * 0.5,
-        r: Math.random() * 1.8 + 0.5,
-        vx: (Math.random() - 0.5) * 0.00008,
-        vy: -Math.random() * 0.00012 - 0.00003,
-        opacity: Math.random() * 0.35 + 0.1,
-    }));
-
-    function lerp(a, b, t) { return a + (t - a) * t; }
-    function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-    function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; } // easeInOut
-
-    function rgbLerp(c1, c2, t) {
-        return [
-            Math.round(c1[0] + (c2[0] - c1[0]) * t),
-            Math.round(c1[1] + (c2[1] - c1[1]) * t),
-            Math.round(c1[2] + (c2[2] - c1[2]) * t),
-        ];
-    }
-    function rgb(c, a) {
-        return a !== undefined
-            ? `rgba(${c[0]},${c[1]},${c[2]},${a})`
-            : `rgb(${c[0]},${c[1]},${c[2]})`;
-    }
-
-    function draw(timestamp) {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const t = clamp(elapsed / TOTAL_DURATION, 0, 1); // 0 → 1
-        const et = ease(t);
-
-        const W = canvas.width;
-        const H = canvas.height;
-
-        // Sun position: rises from below horizon to about 30% up the screen
-        const horizonY = H * 0.62;
-        const sunR = Math.min(W, H) * 0.09;
-        const sunCX = W * 0.5;
-        const sunStartY = horizonY + sunR * 1.5;
-        const sunEndY   = horizonY - H * 0.28;
-        const sunCY = sunStartY + (sunEndY - sunStartY) * et;
-
-        // ── Sky gradient ─────────────────────────────────────────────────
-        // At t=0: deep navy night. At t=1: rich dawn blue-to-coral.
-        const skyTopNight  = C.primaryDark;
-        const skyTopDay    = C.skyHigh;
-        const skyMidNight  = C.primary;
-        const skyMidDay    = C.primaryLight;
-        const skyLowNight  = C.primaryDark;
-        const skyLowDay    = [30, 100, 150]; // cyan-lit horizon
-
-        const skyTop  = rgbLerp(skyTopNight,  skyTopDay,  et);
-        const skyMid  = rgbLerp(skyMidNight,  skyMidDay,  et);
-        const skyLow  = rgbLerp(skyLowNight,  skyLowDay,  et);
-
-        const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
-        skyGrad.addColorStop(0,    rgb(skyTop));
-        skyGrad.addColorStop(0.45, rgb(skyMid));
-        skyGrad.addColorStop(0.85, rgb(skyLow));
-        skyGrad.addColorStop(1,    rgb(rgbLerp(skyLow, C.cyanDeep, et * 0.6)));
-
-        ctx.fillStyle = skyGrad;
-        ctx.fillRect(0, 0, W, H);
-
-        // ── Ground / water below horizon ─────────────────────────────────
-        const groundGrad = ctx.createLinearGradient(0, horizonY, 0, H);
-        const groundTop = rgbLerp(C.primaryDark, [20, 50, 75], et);
-        const groundBot = rgbLerp([5, 15, 30],   [8, 28, 50], et);
-        groundGrad.addColorStop(0, rgb(groundTop));
-        groundGrad.addColorStop(1, rgb(groundBot));
-        ctx.fillStyle = groundGrad;
-        ctx.fillRect(0, horizonY, W, H - horizonY);
-
-        // ── Stars (fade out as sun rises) ────────────────────────────────
-        const starFade = clamp(1 - et * 2.5, 0, 1);
-        if (starFade > 0) {
-            stars.forEach(s => {
-                s.twinkle += s.twinkleSpeed;
-                const tw = 0.5 + 0.5 * Math.sin(s.twinkle);
-                ctx.beginPath();
-                ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${s.opacity * tw * starFade})`;
-                ctx.fill();
-            });
-        }
-
-        // ── Logo glow / corona (wide halo, cyan-blue to match logo) ─────
-        const glowRadius = sunR * (5 + et * 8);
-        const sunGlow = ctx.createRadialGradient(sunCX, sunCY, sunR * 0.5, sunCX, sunCY, glowRadius);
-        sunGlow.addColorStop(0,   rgb(C.cyan,        0.40 * et));
-        sunGlow.addColorStop(0.2, rgb(C.cyanMid,     0.25 * et));
-        sunGlow.addColorStop(0.5, rgb(C.cyanDeep,    0.12 * et));
-        sunGlow.addColorStop(1,   rgb(C.primaryDark, 0));
-        ctx.fillStyle = sunGlow;
-        ctx.fillRect(0, 0, W, H);
-
-        // ── Light rays from logo (cyan-blue to match logo gradient) ────────
-        if (et > 0.1) {
-            const rayOpacity = clamp((et - 0.1) / 0.5, 0, 1);
-            ctx.save();
-            ctx.globalCompositeOperation = 'screen';
-            rays.forEach(ray => {
-                const rx1 = sunCX;
-                const ry1 = sunCY;
-                const rx2 = sunCX + Math.cos(ray.angle) * W * ray.length;
-                const ry2 = sunCY + Math.sin(ray.angle) * H * ray.length;
-                const rayGrad = ctx.createLinearGradient(rx1, ry1, rx2, ry2);
-                rayGrad.addColorStop(0,   `rgba(0,210,255,${ray.opacity * rayOpacity * 0.95})`);
-                rayGrad.addColorStop(0.3, `rgba(0,160,220,${ray.opacity * rayOpacity * 0.5})`);
-                rayGrad.addColorStop(0.7, `rgba(15,85,140,${ray.opacity * rayOpacity * 0.2})`);
-                rayGrad.addColorStop(1,   `rgba(11,42,66,0)`);
-                ctx.strokeStyle = rayGrad;
-                ctx.lineWidth = W * ray.width;
-                ctx.lineCap = 'round';
-                ctx.beginPath();
-                ctx.moveTo(rx1, ry1);
-                ctx.lineTo(rx2, ry2);
-                ctx.stroke();
-            });
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.restore();
-        }
-
-        // ── Horizon cyan glow band ────────────────────────────────────────
-        const horizGlow = ctx.createRadialGradient(sunCX, horizonY, 0, sunCX, horizonY, W * 0.65);
-        horizGlow.addColorStop(0,   rgb(C.cyan,        0.45 * et));
-        horizGlow.addColorStop(0.25,rgb(C.cyanMid,     0.28 * et));
-        horizGlow.addColorStop(0.6, rgb(C.primaryLight, 0.1 * et));
-        horizGlow.addColorStop(1,   rgb(C.primaryDark, 0));
-        ctx.fillStyle = horizGlow;
-        ctx.fillRect(0, 0, W, H);
-
-        // ── Logo rising (replacing sun disc) ─────────────────────────────
-        const logoOpacity = Math.min(1, et * 2.5);
-        const logoSize = sunR * 2.2; // diameter
-        if (logoImg.complete && logoImg.naturalWidth > 0) {
-            ctx.save();
-            ctx.globalAlpha = logoOpacity;
-            // Soft circular clip so logo blends into glow like a rising sun
-            ctx.beginPath();
-            ctx.arc(sunCX, sunCY, sunR * 1.05, 0, Math.PI * 2);
-            ctx.clip();
-            ctx.drawImage(logoImg,
-                sunCX - logoSize / 2,
-                sunCY - logoSize / 2,
-                logoSize,
-                logoSize
-            );
-            ctx.restore();
-        } else {
-            // Fallback: cyan disc if image not loaded yet
-            const fallback = ctx.createRadialGradient(sunCX, sunCY, 0, sunCX, sunCY, sunR);
-            fallback.addColorStop(0,   rgb(C.cyan,     logoOpacity));
-            fallback.addColorStop(0.6, rgb(C.cyanMid,  logoOpacity));
-            fallback.addColorStop(1,   rgb(C.cyanDeep, logoOpacity));
-            ctx.fillStyle = fallback;
-            ctx.beginPath();
-            ctx.arc(sunCX, sunCY, sunR, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // ── Water reflections (cyan logo shimmer) ─────────────────────────
-        if (et > 0.15) {
-            const reflOpacity = clamp((et - 0.15) / 0.4, 0, 0.45);
-            for (let col = -3; col <= 3; col++) {
-                const rx = sunCX + col * (W * 0.04);
-                const rw = W * 0.018 * (1 - Math.abs(col) * 0.25);
-                const reflGrad = ctx.createLinearGradient(0, horizonY, 0, H * 0.85);
-                reflGrad.addColorStop(0,   rgb(C.cyan,        reflOpacity * 0.9));
-                reflGrad.addColorStop(0.3, rgb(C.cyanDeep,    reflOpacity * 0.5));
-                reflGrad.addColorStop(1,   rgb(C.primaryDark, 0));
-                ctx.fillStyle = reflGrad;
-                ctx.beginPath();
-                ctx.ellipse(rx, horizonY + (H - horizonY) * 0.3, rw, (H - horizonY) * 0.55, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        // ── Mountain silhouette back layer ───────────────────────────────
-        const mtn2Color = rgbLerp(C.primaryDark, [15, 45, 68], et);
-        ctx.beginPath();
-        ctx.moveTo(0, H);
-        horizonPoints2.forEach(p => {
-            ctx.lineTo(p.x * W, horizonY - p.y * H * 1.1);
-        });
-        ctx.lineTo(W, H);
-        ctx.closePath();
-        ctx.fillStyle = rgb(mtn2Color);
-        ctx.fill();
-
-        // ── Mountain silhouette front layer ──────────────────────────────
-        const mtn1Color = rgbLerp(C.primaryDark, [10, 32, 52], et * 0.8);
-        ctx.beginPath();
-        ctx.moveTo(0, H);
-        horizonPoints.forEach(p => {
-            ctx.lineTo(p.x * W, horizonY - p.y * H * 1.35);
-        });
-        ctx.lineTo(W, H);
-        ctx.closePath();
-        ctx.fillStyle = rgb(mtn1Color);
-        ctx.fill();
-
-        // ── Floating dust motes (lit by cyan logo light) ──────────────────
-        if (et > 0.3) {
-            const moteOpacity = clamp((et - 0.3) / 0.4, 0, 1);
-            motes.forEach(m => {
-                m.x += m.vx;
-                m.y += m.vy;
-                if (m.y < 0.3) { m.y = 0.65 + Math.random() * 0.3; m.x = Math.random(); }
-                ctx.beginPath();
-                ctx.arc(m.x * W, m.y * H, m.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(0,195,255,${m.opacity * moteOpacity * 0.6})`;
-                ctx.fill();
-            });
-        }
-
-        // ── Vignette ─────────────────────────────────────────────────────
-        const vign = ctx.createRadialGradient(W/2, H/2, H*0.2, W/2, H/2, H*0.85);
-        vign.addColorStop(0, 'rgba(0,0,0,0)');
-        vign.addColorStop(1, `rgba(5,15,28,${0.5 + et * 0.15})`);
-        ctx.fillStyle = vign;
-        ctx.fillRect(0, 0, W, H);
-
-        if (t < 1) {
-            animFrameId = requestAnimationFrame(draw);
-        } else {
-            // Hold for a moment then fade out
-            setTimeout(() => {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    cancelAnimationFrame(animFrameId);
-                }, 1000);
-            }, 300);
-        }
-    }
+    const loaderPct = document.getElementById('loaderPct');
+    let pct = 0;
+    const pctTimer = setInterval(() => {
+        pct = Math.min(pct + Math.random() * 4 + 1, 99);
+        if (loaderPct) loaderPct.textContent = Math.floor(pct) + '%';
+    }, 60);
 
     window.addEventListener('load', function () {
-        animFrameId = requestAnimationFrame(draw);
+        clearInterval(pctTimer);
+        if (loaderPct) loaderPct.textContent = '100%';
+        // Reduced from 900ms to 400ms
+        setTimeout(() => {
+            if (loadingScreen) loadingScreen.classList.add('hidden');
+        }, 400);
     });
 
+    // ===== HERO CANVAS =====
+    // PERF: ribbon count 20->12, point count 80->48, pauses when tab hidden
+    const heroCanvas = document.getElementById('heroCanvas');
+    if (heroCanvas) {
+        const ctx = heroCanvas.getContext('2d');
+        let W, H, t = 0, animId;
 
+        function resizeCanvas() {
+            W = heroCanvas.width = heroCanvas.offsetWidth;
+            H = heroCanvas.height = heroCanvas.offsetHeight;
+        }
 
-    // ===== NAVIGATION SCROLL EFFECT - IMPROVED =====
-    const navbar = document.querySelector('.navbar');
+        function waveColor(index, total, t, alpha) {
+            const paletteDeg = [190, 198, 208, 218, 200, 185, 20, 195];
+            const sat = [80, 75, 70, 68, 78, 82, 90, 72];
+            const lit = [65, 60, 55, 58, 62, 68, 60, 56];
+            const i = index % paletteDeg.length;
+            const hShift = Math.sin(t * 0.4 + index * 0.5) * 10;
+            return `hsla(${paletteDeg[i] + hShift}, ${sat[i]}%, ${lit[i]}%, ${alpha})`;
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, W, H);
+
+            const bg = ctx.createLinearGradient(0, 0, W * 0.7, H);
+            bg.addColorStop(0, '#020a14');
+            bg.addColorStop(0.5, '#050f1c');
+            bg.addColorStop(1, '#030810');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            const cx = W * 0.62, cy = H * 0.48;
+            const numRibbons = 12; // was 20
+
+            for (let r = numRibbons; r >= 0; r--) {
+                const progress = r / numRibbons;
+                const phaseOffset = progress * Math.PI * 2.8 + t * 0.45;
+                const radiusX = W * (0.18 + progress * 0.15);
+                const radiusY = H * (0.27 + progress * 0.1);
+                const thickness = 16 + Math.sin(progress * Math.PI) * 30;
+
+                const pts = [];
+                for (let i = 0; i <= 48; i++) { // was 80
+                    const angle = (i / 48) * Math.PI * 2;
+                    pts.push({
+                        x: cx + Math.cos(angle) * radiusX + Math.cos(angle * 1.8 + phaseOffset * 0.7) * W * 0.04,
+                        y: cy + Math.sin(angle) * radiusY + Math.sin(angle * 2.5 + phaseOffset) * H * 0.055
+                    });
+                }
+
+                const alpha = 0.1 + Math.sin(progress * Math.PI) * 0.25;
+                const grad = ctx.createLinearGradient(cx - radiusX, cy, cx + radiusX, cy);
+                grad.addColorStop(0,   waveColor(r,   numRibbons, t, alpha * 0.5));
+                grad.addColorStop(0.3, waveColor(r+2, numRibbons, t, alpha));
+                grad.addColorStop(0.6, waveColor(r+4, numRibbons, t, alpha * 1.1));
+                grad.addColorStop(1,   waveColor(r+6, numRibbons, t, alpha * 0.5));
+
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                ctx.closePath();
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = thickness;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+            }
+
+            for (let r = 0; r < 4; r++) {
+                const progress = 0.35 + r * 0.07;
+                const phaseOffset = progress * Math.PI * 2.8 + t * 0.45;
+                const radiusX = W * (0.18 + progress * 0.15);
+                const radiusY = H * (0.27 + progress * 0.1);
+                const pts = [];
+                for (let i = 0; i <= 48; i++) {
+                    const angle = (i / 48) * Math.PI * 2;
+                    pts.push({
+                        x: cx + Math.cos(angle) * radiusX + Math.cos(angle * 1.8 + phaseOffset * 0.7) * W * 0.04,
+                        y: cy + Math.sin(angle) * radiusY + Math.sin(angle * 2.5 + phaseOffset) * H * 0.055
+                    });
+                }
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                ctx.closePath();
+                ctx.strokeStyle = `rgba(255,255,255,${0.05 + r * 0.018})`;
+                ctx.lineWidth = 2.5 + r * 1.2;
+                ctx.stroke();
+            }
+
+            const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.4);
+            glow.addColorStop(0, 'rgba(0,180,216,0.12)');
+            glow.addColorStop(0.5, 'rgba(0,119,182,0.05)');
+            glow.addColorStop(1, 'transparent');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, W, H);
+
+            const ox = cx - W * 0.18 + Math.sin(t * 0.6) * W * 0.04;
+            const oy = cy - H * 0.2 + Math.cos(t * 0.5) * H * 0.03;
+            const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, W * 0.06);
+            og.addColorStop(0, 'rgba(255,107,43,0.45)');
+            og.addColorStop(0.5, 'rgba(255,107,43,0.12)');
+            og.addColorStop(1, 'transparent');
+            ctx.fillStyle = og;
+            ctx.beginPath();
+            ctx.arc(ox, oy, W * 0.06, 0, Math.PI * 2);
+            ctx.fill();
+
+            t += 0.050;
+            animId = requestAnimationFrame(drawScene);
+        }
+
+        resizeCanvas();
+        drawScene();
+
+        // PERF: pause canvas when tab is hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) { cancelAnimationFrame(animId); animId = null; }
+            else if (!animId) drawScene();
+        });
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            cancelAnimationFrame(animId);
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { resizeCanvas(); drawScene(); }, 150);
+        });
+    }
+
+    // ===== CTA CANVAS WAVES =====
+    // PERF: fewer waves, wider point step, every-other-frame rendering, pauses offscreen/hidden
+    function initCtaCanvas(canvasId, variant) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        let W, H, t = 0, animId = null, frameCount = 0;
+        let isVisible = false;
+
+        function resize() {
+            W = canvas.width = canvas.offsetWidth;
+            H = canvas.height = canvas.offsetHeight;
+        }
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                isVisible = e.isIntersecting;
+                if (isVisible && !animId) loop();
+            });
+        }, { threshold: 0.05 });
+        observer.observe(canvas.parentElement);
+
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, variant === 1 ? '#020b18' : '#030610');
+            bg.addColorStop(1, variant === 1 ? '#040d1a' : '#050a16');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            const numWaves = variant === 1 ? 10 : 9; // was 14/12
+
+            for (let w = 0; w < numWaves; w++) {
+                const prog  = w / numWaves;
+                const yBase = H * (0.15 + prog * 0.7);
+                const amp   = H * (0.04 + Math.sin(prog * Math.PI) * 0.08);
+                const freq  = variant === 1 ? (0.008 + prog * 0.004) : (0.012 + prog * 0.006);
+                const speed = variant === 1 ? t * (0.4 + prog * 0.3) : t * (0.5 + prog * 0.25) * -1;
+
+                let hue, sat, lit, alpha;
+                if (variant === 1) {
+                    const isOrange = w === Math.floor(numWaves * 0.55);
+                    hue   = isOrange ? 20 : 185 + prog * 30;
+                    sat   = isOrange ? 88 : 75;
+                    lit   = isOrange ? 58 : 60 + Math.sin(prog * Math.PI) * 12;
+                    alpha = isOrange ? 0.55 : 0.08 + Math.sin(prog * Math.PI) * 0.28;
+                } else {
+                    const isOrange = w === 2;
+                    hue   = isOrange ? 22 : 195 + prog * 25;
+                    sat   = isOrange ? 85 : 70;
+                    lit   = isOrange ? 56 : 55 + Math.sin(prog * Math.PI) * 10;
+                    alpha = isOrange ? 0.45 : 0.07 + Math.sin(prog * Math.PI) * 0.25;
+                }
+
+                const lineWidth = variant === 1
+                    ? 1.5 + Math.sin(prog * Math.PI) * 5
+                    : 1.2 + Math.sin(prog * Math.PI) * 4;
+
+                ctx.beginPath();
+                for (let x = 0; x <= W + 4; x += 4) { // was x += 3
+                    const y = yBase
+                        + Math.sin(x * freq + speed) * amp
+                        + Math.sin(x * freq * 0.5 + speed * 0.7 + prog) * amp * 0.4;
+                    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                }
+
+                const grad = ctx.createLinearGradient(0, 0, W, 0);
+                grad.addColorStop(0,    `hsla(${hue},${sat}%,${lit}%,0)`);
+                grad.addColorStop(0.15, `hsla(${hue},${sat}%,${lit}%,${alpha})`);
+                grad.addColorStop(0.5,  `hsla(${hue+15},${sat}%,${lit+8}%,${alpha*1.2})`);
+                grad.addColorStop(0.85, `hsla(${hue},${sat}%,${lit}%,${alpha})`);
+                grad.addColorStop(1,    `hsla(${hue},${sat}%,${lit}%,0)`);
+
+                ctx.strokeStyle = grad;
+                ctx.lineWidth   = lineWidth;
+                ctx.lineCap     = 'round';
+                ctx.stroke();
+            }
+
+            const gX1 = variant === 1 ? W * 0.15 : W * 0.85;
+            const gX2 = variant === 1 ? W * 0.82 : W * 0.18;
+
+            const g1 = ctx.createRadialGradient(gX1, H*0.5, 0, gX1, H*0.5, W*0.35);
+            g1.addColorStop(0, 'rgba(0,180,216,0.1)'); g1.addColorStop(1, 'transparent');
+            ctx.fillStyle = g1; ctx.fillRect(0,0,W,H);
+
+            const g2 = ctx.createRadialGradient(gX2, H*0.5, 0, gX2, H*0.5, W*0.28);
+            g2.addColorStop(0, 'rgba(255,107,43,0.09)'); g2.addColorStop(1, 'transparent');
+            ctx.fillStyle = g2; ctx.fillRect(0,0,W,H);
+
+            t += 0.012;
+        }
+
+        function loop() {
+            if (!isVisible || document.hidden) { animId = null; return; }
+            frameCount++;
+            if (frameCount % 2 === 0) draw(); // PERF: render every other frame (~30 fps)
+            animId = requestAnimationFrame(loop);
+        }
+
+        resize();
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isVisible && !animId) loop();
+        });
+        let resizeTimer;
+        window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
+    }
+
+    initCtaCanvas('ctaCanvas1', 1);
+    initCtaCanvas('ctaCanvas2', 2);
+
+    // ===== NAVIGATION =====
+    const navbar   = document.querySelector('.navbar');
     const navLinks = document.querySelectorAll('.nav-link');
-    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navbarToggler  = document.querySelector('.navbar-toggler');
     const navbarCollapse = document.querySelector('.navbar-collapse');
-    
+
     function updateNavbarOnScroll() {
         if (!navbar) return;
-        
-        // Get scroll position from multiple sources for reliability
-        const scrollTop = window.pageYOffset || 
-                         document.documentElement.scrollTop || 
-                         document.body.scrollTop || 
-                         0;
-        
-        // Use a smaller threshold for more responsive behavior
-        const scrollThreshold = 20;
-        
-        if (scrollTop > scrollThreshold) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
+        navbar.classList.toggle('scrolled', (window.pageYOffset || document.documentElement.scrollTop) > 20);
     }
-    
-    // Initial check
     updateNavbarOnScroll();
-    
-    // Listen for scroll events with multiple event types for reliability
-    window.addEventListener('scroll', function() {
-        // Use requestAnimationFrame for smoother performance
-        window.requestAnimationFrame(updateNavbarOnScroll);
-    }, { passive: true });
-    
-    // Also check on touch end for mobile devices
-    window.addEventListener('touchend', function() {
-        window.requestAnimationFrame(updateNavbarOnScroll);
-    }, { passive: true });
-    
-    // Check when page finishes loading/refreshing
-    window.addEventListener('load', function() {
-        window.requestAnimationFrame(updateNavbarOnScroll);
-    });
-    
-    // Check when page becomes visible (user switches back to tab)
-    document.addEventListener('visibilitychange', function() {
-        if (!document.hidden) {
-            window.requestAnimationFrame(updateNavbarOnScroll);
-        }
-    });
-    
-    // Check on resize
-    window.addEventListener('resize', function() {
-        window.requestAnimationFrame(updateNavbarOnScroll);
-    }, { passive: true });
+    window.addEventListener('scroll',   () => requestAnimationFrame(updateNavbarOnScroll), { passive: true });
+    window.addEventListener('touchend', () => requestAnimationFrame(updateNavbarOnScroll), { passive: true });
 
-    // ===== MOBILE NAVIGATION TOGGLE & CLOSE FUNCTIONALITY =====
     if (navbarToggler && navbarCollapse) {
-        
-        // Toggle menu when clicking the hamburger button
         navbarToggler.addEventListener('click', function(e) {
             e.stopPropagation();
-            // Let Bootstrap handle the collapse toggling
-            // We'll just manage body scroll
             setTimeout(() => {
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                if (isExpanded) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
+                document.body.style.overflow = this.getAttribute('aria-expanded') === 'true' ? 'hidden' : '';
             }, 100);
         });
 
-        // Close menu when clicking on a nav link
         navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function() {
                 const href = this.getAttribute('href');
-                if (href && href.startsWith('#')) {
-                    // Close the mobile menu
-                    if (navbarCollapse.classList.contains('show')) {
-                        // Trigger Bootstrap's collapse
-                        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                            toggle: false
-                        });
-                        bsCollapse.hide();
-                        document.body.style.overflow = '';
-                        
-                        // Reset toggler aria-expanded
-                        navbarToggler.setAttribute('aria-expanded', 'false');
-                        navbarToggler.classList.add('collapsed');
-                    }
+                if (href && href.startsWith('#') && navbarCollapse.classList.contains('show')) {
+                    new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
+                    document.body.style.overflow = '';
+                    navbarToggler.setAttribute('aria-expanded', 'false');
+                    navbarToggler.classList.add('collapsed');
                 }
             });
         });
 
-        // Close menu when clicking outside
         document.addEventListener('click', function(e) {
-            // Check if menu is open
-            if (navbarCollapse.classList.contains('show')) {
-                // Check if click is outside navbar and not on toggler
-                if (!navbar.contains(e.target) || e.target === navbarToggler) {
-                    // Close the mobile menu
-                    const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                        toggle: false
-                    });
-                    bsCollapse.hide();
-                    document.body.style.overflow = '';
-                    
-                    // Reset toggler aria-expanded
-                    navbarToggler.setAttribute('aria-expanded', 'false');
-                    navbarToggler.classList.add('collapsed');
-                }
-            }
-        });
-
-        // Close menu when pressing Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && navbarCollapse.classList.contains('show')) {
-                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                    toggle: false
-                });
-                bsCollapse.hide();
+            if (navbarCollapse.classList.contains('show') && !navbar.contains(e.target)) {
+                new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
                 document.body.style.overflow = '';
-                
-                // Reset toggler aria-expanded
                 navbarToggler.setAttribute('aria-expanded', 'false');
                 navbarToggler.classList.add('collapsed');
             }
         });
 
-        // Clean up when collapse is hidden
-        navbarCollapse.addEventListener('hidden.bs.collapse', function() {
-            document.body.style.overflow = '';
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && navbarCollapse.classList.contains('show')) {
+                new bootstrap.Collapse(navbarCollapse, { toggle: false }).hide();
+                document.body.style.overflow = '';
+                navbarToggler.setAttribute('aria-expanded', 'false');
+                navbarToggler.classList.add('collapsed');
+            }
         });
 
-        // Prevent body scroll when collapse is shown
-        navbarCollapse.addEventListener('shown.bs.collapse', function() {
-            document.body.style.overflow = 'hidden';
-        });
+        navbarCollapse.addEventListener('hidden.bs.collapse', () => document.body.style.overflow = '');
+        navbarCollapse.addEventListener('shown.bs.collapse',  () => document.body.style.overflow = 'hidden');
     }
 
-    // ===== SMOOTH SCROLLING FOR NAVIGATION LINKS =====
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
             if (href && href.startsWith('#')) {
                 e.preventDefault();
-                
-                // Remove active class from all links
                 navLinks.forEach(l => l.classList.remove('active'));
-                
-                // Add active class to clicked link
                 this.classList.add('active');
-                
-                const targetElement = document.querySelector(href);
-                if (targetElement) {
-                    // Smooth scroll to target
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                    
-                    // Update navbar state after scrolling
-                    setTimeout(() => {
-                        window.requestAnimationFrame(updateNavbarOnScroll);
-                    }, 300);
+                const target = document.querySelector(href);
+                if (target) {
+                    window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                    setTimeout(() => requestAnimationFrame(updateNavbarOnScroll), 300);
                 }
             }
         });
     });
 
-    // ===== UPDATE ACTIVE NAV LINK ON SCROLL =====
     function updateActiveNavLink() {
-        const scrollPosition = window.scrollY + 100;
-        
+        const sp = window.scrollY + 100;
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
             if (href && href.startsWith('#')) {
-                const targetElement = document.querySelector(href);
-                if (targetElement) {
-                    const targetTop = targetElement.offsetTop;
-                    const targetBottom = targetTop + targetElement.offsetHeight;
-                    
-                    if (scrollPosition >= targetTop && scrollPosition < targetBottom) {
-                        navLinks.forEach(l => l.classList.remove('active'));
-                        link.classList.add('active');
-                    }
+                const el = document.querySelector(href);
+                if (el && sp >= el.offsetTop && sp < el.offsetTop + el.offsetHeight) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
                 }
             }
         });
     }
-    
-    // Throttled scroll handler for performance
-    window.addEventListener('scroll', throttle(function() {
-        window.requestAnimationFrame(updateActiveNavLink);
-    }, 100));
-
-    // ===== HERO TYPING ANIMATION =====
-    const typingText = document.querySelector('.typing-text');
-    if (typingText) {
-        const sentences = ['Web Applications', 'Digital Experiences', 'Mobile Solutions', 'E-commerce Platforms', 'Brand Identity'];
-        let sentenceIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        let isPaused = false;
-        
-        function typeText() {
-            if (isPaused) return;
-            const currentSentence = sentences[sentenceIndex];
-            
-            if (!isDeleting) {
-                typingText.textContent = currentSentence.substring(0, charIndex + 1);
-                charIndex++;
-                if (charIndex === currentSentence.length) {
-                    isPaused = true;
-                    setTimeout(() => {
-                        isPaused = false;
-                        isDeleting = true;
-                        setTimeout(typeText, 500);
-                    }, 2000);
-                    return;
-                }
-            } else {
-                typingText.textContent = currentSentence.substring(0, charIndex - 1);
-                charIndex--;
-                if (charIndex === 0) {
-                    isDeleting = false;
-                    sentenceIndex = (sentenceIndex + 1) % sentences.length;
-                }
-            }
-            setTimeout(typeText, isDeleting ? 50 : 100);
-        }
-        setTimeout(typeText, 1000);
-    }
+    window.addEventListener('scroll', throttle(() => requestAnimationFrame(updateActiveNavLink), 100), { passive: true });
 
     // ===== ANIMATED COUNTERS =====
-    const statNumbers = document.querySelectorAll('.stat-number');
-    
     function animateCounter(counter) {
         const target = parseInt(counter.getAttribute('data-count'));
-        const duration = 2000;
-        const increment = target / (duration / 16);
+        const increment = target / (2000 / 16);
         let current = 0;
-        
         const timer = setInterval(() => {
             current += increment;
-            if (current >= target) {
-                current = target;
-                clearInterval(timer);
-            }
-            
-            const originalText = counter.textContent;
-            if (originalText.includes('+')) {
-                counter.textContent = Math.floor(current) + '+';
-            } else if (originalText.includes('%')) {
-                counter.textContent = Math.floor(current) + '%';
-            } else if (originalText.includes('/')) {
-                counter.textContent = Math.floor(current) + '/7';
-            } else {
-                counter.textContent = Math.floor(current);
-            }
+            if (current >= target) { current = target; clearInterval(timer); }
+            counter.textContent = Math.floor(current);
         }, 16);
     }
-    
-    // Use Intersection Observer to trigger counters when visible
+
     const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const counters = entry.target.querySelectorAll('.stat-number');
-                counters.forEach(counter => {
+                entry.target.querySelectorAll('.stat-number').forEach(counter => {
                     if (!counter.classList.contains('animated')) {
                         counter.classList.add('animated');
                         animateCounter(counter);
@@ -616,44 +372,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }, { threshold: 0.3 });
-    
-    const heroSection = document.querySelector('.hero-section');
-    if (heroSection) {
-        counterObserver.observe(heroSection);
-    }
+
+    const aboutStats = document.querySelector('.about-stats');
+    if (aboutStats) counterObserver.observe(aboutStats);
 
     // ===== FORM SUBMISSION =====
     const contactForm = document.getElementById('contactForm');
-    
     if (contactForm) {
         contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
             submitBtn.disabled = true;
-            
             try {
                 const formData = new FormData(this);
                 const data = {
-                    name: formData.get('name'),
-                    email: formData.get('email'),
-                    phone: formData.get('phone') || 'Not provided',
+                    name:    formData.get('name'),
+                    email:   formData.get('email'),
+                    phone:   formData.get('phone') || 'Not provided',
                     message: formData.get('message')
                 };
-                
                 const response = await fetch(this.action, {
                     method: 'POST',
                     body: JSON.stringify(data),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
                 });
-                
                 if (response.ok) {
-                    showAlert('Success! Your message has been sent. We\'ll get back to you within 24 hours.', 'success');
+                    showAlert("Success! Your message has been sent. We'll get back to you within 24 hours.", 'success');
                     this.reset();
                 } else {
                     const subject = encodeURIComponent('Cascade Creations Inquiry');
@@ -671,137 +417,223 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    // Alert system
-    function showAlert(message, type) {
-        const existingAlert = document.querySelector('.alert');
-        if (existingAlert) existingAlert.remove();
-        
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type}`;
-        alert.innerHTML = `
-            <div class="alert-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            </div>
-            <button class="alert-close" aria-label="Close alert"><i class="fas fa-times"></i></button>
-        `;
-        
-        document.body.appendChild(alert);
-        setTimeout(() => alert.classList.add('show'), 10);
-        
-        const closeBtn = alert.querySelector('.alert-close');
-        closeBtn.addEventListener('click', () => {
-            alert.classList.remove('show');
-            setTimeout(() => alert.remove(), 300);
-        });
-        
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.classList.remove('show');
-                setTimeout(() => alert.remove(), 300);
-            }
-        }, 5000);
-    }
 
-    // ===== NEWSLETTER FORM =====
     const newsletterForm = document.querySelector('.newsletter-form');
     if (newsletterForm) {
         newsletterForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const emailInput = this.querySelector('input[type="email"]');
             const email = emailInput.value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (!email || !emailRegex.test(email)) {
-                showAlert('Please enter a valid email address.', 'error');
-                return;
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showAlert('Please enter a valid email address.', 'error'); return;
             }
             showAlert('Thank you for subscribing to our newsletter!', 'success');
             emailInput.value = '';
         });
     }
 
-    // ===== HERO PARALLAX (SINGLE BG IMAGE) =====
-    const heroBg = document.querySelector('.hero-parallax-bg');
+    // ===== ANIMATE ON DISPLAY (AOD) =====
+    // PERF: single shared observer — replaces both per-element and per-section observers
+    (function() {
+        const aodElements = document.querySelectorAll('[data-aod]');
+        if (!aodElements.length) return;
 
-    function updateHeroParallax() {
-        if (!heroBg) return;
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion || window.innerWidth < 768) return;
-
-        const scrollY = window.pageYOffset;
-        heroBg.style.transform = `translateY(${scrollY * 0.35}px)`;
-    }
-
-    window.addEventListener('scroll', throttle(updateHeroParallax, 16));
-    updateHeroParallax();
-
-    // ===== PARALLAX CTA =====
-    function initParallaxCTA() {
-        const parallaxSection = document.querySelector('.parallax-section');
-        if (!parallaxSection) return;
-        
-        const parallaxLayers = parallaxSection.querySelectorAll('.parallax-bg');
-        if (parallaxLayers.length === 0) return;
-        
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion || window.innerWidth < 768) {
-            parallaxLayers.forEach(layer => {
-                layer.style.backgroundAttachment = 'scroll';
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const el = entry.target;
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        el.classList.add('aod-in');
+                        el.classList.remove('aod-out');
+                    }, parseInt(el.dataset.aodDelay || 0));
+                } else {
+                    el.classList.remove('aod-in');
+                    el.classList.add('aod-out');
+                }
             });
-            return;
+        }, { threshold: 0.15, rootMargin: '0px 0px -20px 0px' });
+
+        aodElements.forEach(el => observer.observe(el));
+    })();
+
+
+    // ===== SECTION PULSE CANVASES =====
+    // Matching the hero canvas aesthetic: animated sinusoidal ribbon loops.
+    // White sections (about, process, aod)  → deep teal/navy strokes, visible on light bg
+    // Dark sections  (services, why, contact) → bright cyan + orange strokes, vivid on dark bg
+    (function initSectionPulses() {
+
+        // Config per section: { id, anchor (where canvas is injected), theme }
+        // theme: 'light' = white bg sections, 'dark' = dark bg sections
+        const SECTIONS = [
+            { selector: '.about-section',    theme: 'light', corner: 'topRight'    },
+            { selector: '.process-section',  theme: 'light', corner: 'bottomLeft'  },
+            { selector: '.services-section', theme: 'dark',  corner: 'topLeft'     },
+            { selector: '.aod-section',      theme: 'light', corner: 'center'      },
+            { selector: '.why-section',      theme: 'dark',  corner: 'bottomRight' },
+            { selector: '.contact-section',  theme: 'light', corner: 'topRight'    },
+        ];
+
+        // Palette for light (white bg) sections — dark teal strokes pop on white
+        function lightColor(waveIdx, totalWaves, t, alpha) {
+            const hues = [195, 205, 210, 200, 190, 215, 202];
+            const sats = [85,  80,  75,  88,  82,  78,  86];
+            const lits = [28,  32,  25,  30,  35,  27,  31];   // dark = visible on white
+            const i = waveIdx % hues.length;
+            const hShift = Math.sin(t * 0.35 + waveIdx * 0.6) * 8;
+            return `hsla(${hues[i] + hShift}, ${sats[i]}%, ${lits[i]}%, ${alpha})`;
         }
-        
-        function updateParallax() {
-            const scrollPosition = window.pageYOffset;
-            const sectionTop = parallaxSection.offsetTop;
-            const sectionHeight = parallaxSection.offsetHeight;
-            const sectionStart = sectionTop - window.innerHeight;
-            const sectionEnd = sectionTop + sectionHeight;
-            
-            if (scrollPosition >= sectionStart && scrollPosition <= sectionEnd) {
-                const relativeScroll = scrollPosition - sectionStart;
-                parallaxLayers.forEach(layer => {
-                    const depth = parseFloat(layer.getAttribute('data-depth')) || 0.1;
-                    const yOffset = relativeScroll * depth * 0.3;
-                    layer.style.transform = `translateY(${yOffset}px) scale(${1 + depth * 0.5})`;
+
+        // Palette for dark sections — bright cyan + occasional orange pop
+        function darkColor(waveIdx, totalWaves, t, alpha, isOrange) {
+            if (isOrange) return `hsla(20, 90%, 58%, ${alpha})`;
+            const hues = [185, 195, 205, 190, 200, 210, 188];
+            const sats = [82,  78,  75,  85,  80,  72,  88];
+            const lits = [62,  58,  65,  60,  68,  55,  63];   // bright = vivid on dark
+            const i = waveIdx % hues.length;
+            const hShift = Math.sin(t * 0.4 + waveIdx * 0.5) * 10;
+            return `hsla(${hues[i] + hShift}, ${sats[i]}%, ${lits[i]}%, ${alpha})`;
+        }
+
+        function initPulse(sectionEl, theme, corner) {
+            // Create & inject canvas
+            const canvas = document.createElement('canvas');
+            canvas.className = 'section-pulse-canvas';
+            sectionEl.insertBefore(canvas, sectionEl.firstChild);
+
+            const ctx = canvas.getContext('2d');
+            let W, H, t = 0, animId = null, isVisible = false, frameCount = 0;
+
+            function resize() {
+                W = canvas.width  = sectionEl.offsetWidth;
+                H = canvas.height = sectionEl.offsetHeight;
+            }
+
+            // Observe visibility — only animate when in viewport
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    isVisible = e.isIntersecting;
+                    if (isVisible && !animId) loop();
                 });
+            }, { threshold: 0.05 });
+            observer.observe(sectionEl);
+
+            // Compute focal origin based on corner config
+            function getOrigin() {
+                switch (corner) {
+                    case 'topRight':    return { cx: W * 0.88, cy: H * 0.12 };
+                    case 'topLeft':     return { cx: W * 0.12, cy: H * 0.12 };
+                    case 'bottomRight': return { cx: W * 0.88, cy: H * 0.88 };
+                    case 'bottomLeft':  return { cx: W * 0.12, cy: H * 0.88 };
+                    case 'center':      return { cx: W * 0.50, cy: H * 0.50 };
+                    default:            return { cx: W * 0.50, cy: H * 0.50 };
+                }
             }
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+
+                const { cx, cy } = getOrigin();
+                const numRibbons = 10;
+                const isLight = theme === 'light';
+
+                // Draw ribbons from outermost inward so inner ones paint on top
+                for (let r = numRibbons; r >= 0; r--) {
+                    const progress    = r / numRibbons;
+                    const phaseOffset = progress * Math.PI * 2.6 + t * 0.42;
+                    const radiusX     = W * (0.12 + progress * 0.22);
+                    const radiusY     = H * (0.18 + progress * 0.14);
+                    const thickness   = 10 + Math.sin(progress * Math.PI) * 22;
+
+                    // Build ribbon points as sinusoidal closed loop
+                    const pts = [];
+                    const steps = 48;
+                    for (let i = 0; i <= steps; i++) {
+                        const angle = (i / steps) * Math.PI * 2;
+                        pts.push({
+                            x: cx + Math.cos(angle) * radiusX
+                                  + Math.cos(angle * 1.8 + phaseOffset * 0.65) * W * 0.035,
+                            y: cy + Math.sin(angle) * radiusY
+                                  + Math.sin(angle * 2.4 + phaseOffset)        * H * 0.045,
+                        });
+                    }
+
+                    const baseAlpha = isLight
+                        ? 0.06 + Math.sin(progress * Math.PI) * 0.16   // more opaque on white
+                        : 0.08 + Math.sin(progress * Math.PI) * 0.22;  // brighter on dark
+
+                    const isOrange = !isLight && r === Math.floor(numRibbons * 0.4);
+
+                    const grad = ctx.createLinearGradient(cx - radiusX, cy, cx + radiusX, cy);
+                    if (isLight) {
+                        grad.addColorStop(0,   lightColor(r,   numRibbons, t, baseAlpha * 0.4));
+                        grad.addColorStop(0.3, lightColor(r+2, numRibbons, t, baseAlpha));
+                        grad.addColorStop(0.6, lightColor(r+4, numRibbons, t, baseAlpha * 1.1));
+                        grad.addColorStop(1,   lightColor(r,   numRibbons, t, baseAlpha * 0.4));
+                    } else {
+                        grad.addColorStop(0,   darkColor(r,   numRibbons, t, baseAlpha * 0.4, false));
+                        grad.addColorStop(0.3, darkColor(r+2, numRibbons, t, baseAlpha,       isOrange));
+                        grad.addColorStop(0.6, darkColor(r+4, numRibbons, t, baseAlpha * 1.1, isOrange));
+                        grad.addColorStop(1,   darkColor(r,   numRibbons, t, baseAlpha * 0.4, false));
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(pts[0].x, pts[0].y);
+                    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+                    ctx.closePath();
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth   = thickness;
+                    ctx.lineCap     = 'round';
+                    ctx.lineJoin    = 'round';
+                    ctx.stroke();
+                }
+
+                // Soft inner glow at focal origin
+                const glowColor = isLight
+                    ? 'rgba(0, 119, 182, 0.10)'
+                    : 'rgba(0, 180, 216, 0.13)';
+                const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.38);
+                glow.addColorStop(0, glowColor);
+                glow.addColorStop(1, 'transparent');
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, W, H);
+
+                t += 0.100;
+            }
+
+            function loop() {
+                if (!isVisible || document.hidden) { animId = null; return; }
+                frameCount++;
+                if (frameCount % 2 === 0) draw(); // ~30 fps, matches CTA canvas perf approach
+                animId = requestAnimationFrame(loop);
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && isVisible && !animId) loop();
+            });
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(resize, 150);
+            }, { passive: true });
+
+            resize();
         }
-        
-        window.addEventListener('scroll', throttle(updateParallax, 16));
-        window.addEventListener('resize', debounce(updateParallax, 250));
-        updateParallax();
-    }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, arguments), wait);
-        };
-    }
-    
-    function throttle(func, limit) {
-        let inThrottle;
-        return function() {
-            if (!inThrottle) {
-                func.apply(this, arguments);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    }
+        // Boot all section pulses
+        SECTIONS.forEach(({ selector, theme, corner }) => {
+            const el = document.querySelector(selector);
+            if (el) initPulse(el, theme, corner);
+        });
 
-    initParallaxCTA();
+    })();
 
     // ===== SET CURRENT YEAR =====
-    const currentYear = new Date().getFullYear();
-    const yearElement = document.getElementById('currentYear');
-    if (yearElement) yearElement.textContent = currentYear;
+    const yearEl = document.getElementById('currentYear');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    // ===== STUDIO LINK POPUP =====
+    // ===== STUDIO LINK =====
     const studioLink = document.querySelector('a[href*="CascadeComingSoon"]');
     if (studioLink) {
         studioLink.addEventListener('click', function(e) {
@@ -811,94 +643,46 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ===== GLOBAL UTILITIES =====
-window.CascadeUtils = {
-    debounce: function(func, wait) {
-        let timeout;
-        return function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, arguments), wait);
-        };
-    },
-    throttle: function(func, limit) {
-        let inThrottle;
-        return function() {
-            if (!inThrottle) {
-                func.apply(this, arguments);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    },
-    copyToClipboard: function(text) {
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-        } else {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                return Promise.resolve();
-            } catch (err) {
-                return Promise.reject(err);
-            } finally {
-                document.body.removeChild(textArea);
-            }
+// ===== UTILITIES =====
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        if (!inThrottle) {
+            func.apply(this, arguments);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
         }
-    }
-};
+    };
+}
 
-// Make showAlert globally available
 window.showAlert = function(message, type) {
+    const existing = document.querySelector('.alert');
+    if (existing) existing.remove();
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
     alert.innerHTML = `
         <div class="alert-content">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i>
             <span>${message}</span>
         </div>
-        <button class="alert-close" aria-label="Close alert"><i class="fas fa-times"></i></button>
-    `;
-    
+        <button class="alert-close" aria-label="Close alert"><i class="fas fa-times"></i></button>`;
     document.body.appendChild(alert);
     setTimeout(() => alert.classList.add('show'), 10);
-    
-    const closeBtn = alert.querySelector('.alert-close');
-    closeBtn.addEventListener('click', () => {
+    alert.querySelector('.alert-close').addEventListener('click', () => {
         alert.classList.remove('show');
         setTimeout(() => alert.remove(), 300);
     });
-    
     setTimeout(() => {
-        if (alert.parentNode) {
-            alert.classList.remove('show');
-            setTimeout(() => alert.remove(), 300);
-        }
+        if (alert.parentNode) { alert.classList.remove('show'); setTimeout(() => alert.remove(), 300); }
     }, 5000);
 };
 
-// ===== ERROR HANDLING =====
 window.addEventListener('error', function(e) {
-    console.error('Global error caught:', e.error);
-    if (e.message && e.message.includes('ResizeObserver')) {
-        e.preventDefault();
-    }
+    console.error('Global error:', e.error);
+    if (e.message && e.message.includes('ResizeObserver')) e.preventDefault();
 }, true);
-
 window.addEventListener('unhandledrejection', function(e) {
-    console.error('Unhandled promise rejection:', e.reason);
-    e.preventDefault();
+    console.error('Unhandled rejection:', e.reason); e.preventDefault();
 });
-
-// ===== NETWORK STATUS =====
-window.addEventListener('online', function() {
-    if (window.showAlert) showAlert('You are back online!', 'success');
-});
-
-window.addEventListener('offline', function() {
-    if (window.showAlert) showAlert('You are currently offline. Some features may not be available.', 'error');
-});
+window.addEventListener('online',  () => showAlert('You are back online!', 'success'));
+window.addEventListener('offline', () => showAlert('You are currently offline. Some features may not be available.', 'error'));
